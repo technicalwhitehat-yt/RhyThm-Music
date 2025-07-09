@@ -18,7 +18,7 @@ jobs:
           java-version: '17'
           
       - name: Clone project
-        run: git https://github.com/technicalwhitehat-yt/RhyThm-Music.git
+        run: git clone https://github.com/technicalwhitehat-yt/RhyThm-Music.git
 
       - name: Flutter doctor
         run: flutter doctor
@@ -44,5 +44,5 @@ jobs:
       - name: Upload apk artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Harmony music apk
+          name: RhyThm music apk
           path: ./RhyThm-Music/build/app/outputs/flutter-apk/*apk
