@@ -12,28 +12,48 @@ jobs:
         with:
           repository: 'technicalwhitehat-yt/RhyThm-Music'
 
-      # Step 2: Set up Flutter
+      # Step 2: Set up Java
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+          
+      # Step 3: Set up Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version: '3.24.2'
 
-      # Step 3: Set up Java
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'microsoft'
-          java-version: '17'
-
       # Step 4: Run flutter doctor
       - name: Flutter doctor
         run: flutter doctor
-        
-      # ⭐️ NEW STEP: Fix pubspec.yaml name ⭐️
+
+      # ⭐️ NEW STEP 1: Fix NDK version in build.gradle ⭐️
+      - name: Set NDK Version
+        run: |
+          $buildGradle = "android/app/build.gradle"
+          $content = Get-Content $buildGradle
+          $newContent = $content -replace "ndkVersion flutter.ndkVersion", "ndkVersion '26.1.10909125'"
+          Set-Content -Path $buildGradle -Value $newContent
+        shell: pwsh
+
+      # ⭐️ NEW STEP 2: Fix pubspec.yaml name ⭐️
       - name: Fix pubspec.yaml name
         run: |
           (Get-Content pubspec.yaml).replace('name: rhythm-music', 'name: rhythm_music') | Set-Content pubspec.yaml
+        shell: pwsh
+
+      # ⭐️ NEW STEP 3: Fix inconsistent import paths in all Dart files ⭐️
+      - name: Fix Dart import paths
+        run: |
+          Get-ChildItem -Path . -Filter *.dart -Recurse | ForEach-Object {
+              (Get-Content $_.FullName) |
+              ForEach-Object { $_ -replace 'package:rhythmmusic/', 'package:rhythm_music/' } |
+              ForEach-Object { $_ -replace 'package:harmonymusic/', 'package:rhythm_music/' } |
+              Set-Content $_.FullName
+          }
         shell: pwsh
 
       # Step 5: Install project dependencies
@@ -44,15 +64,11 @@ jobs:
       - name: Update lang data
         run: dart localization/generator.dart
 
-      # Step 7: Set update check flag to true
-      - name: Set update check flag to true
-        run: echo "const updateCheckFlag = true;" > lib/utils/update_check_flag_file.dart
-        
-      # Step 8: Build Android APK
+      # Step 7: Build Android APK
       - name: Build android apk
         run: flutter build apk --split-per-abi --release
 
-      # Step 9: Upload the generated APKs
+      # Step 8: Upload the generated APKs
       - name: Upload apk artifact
         uses: actions/upload-artifact@v4
         with:
