@@ -35,7 +35,7 @@ import 'dart:core' as core$_;
 import 'package:jni/_internal.dart' as jni$_;
 import 'package:jni/jni.dart' as jni$_;
 
-/// from: `com.anandnet.harmonymusic.Equalizer`
+/// from: `com.twh.rhythmmusic.Equalizer`
 class Equalizer extends jni$_.JObject {
   @jni$_.internal
   @core$_.override
