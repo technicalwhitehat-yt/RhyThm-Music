@@ -1,4 +1,4 @@
-name: RhyThm-Music
+name: rhythm-music
 description: Rhythm Music is an open-source, ad-free music player designed for smooth, high-performance offline playback. With a modern UI and powerful features, it puts your music experience in your hands — fast, clean, and distraction-free.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
