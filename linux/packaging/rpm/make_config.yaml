@@ -1,0 +1,26 @@
+icon: assets/icons/icon.png
+summary: An application to stream Music
+group: Application/Multimedia
+vendor: Technical White Hat
+packager: twh
+license: GPLv3
+url: https://github.com/technicalwhitehat-yt/RhyThm-Music
+
+requires:
+  - mpv-libs
+  - libappindicator
+
+display_name: RhyThm Music
+
+keywords:
+  - Opensource
+  - Music
+  - Streaming
+  - Flutter
+
+generic_name: Music Application
+
+categories:
+  - Music
+
+startup_notify: true
