@@ -1,0 +1,53 @@
+name: Build linux binaries (deb, appimage & rpm) 
+on: workflow_dispatch
+  
+jobs:
+  build-linux-deb-appimage-rpm:
+    runs-on: ubuntu-22.04
+    
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.24.2'
+
+      - name: install required deps for linux package
+        run: |
+          sudo apt-get install libmpv-dev mpv libayatana-appindicator3-dev ninja-build libgtk-3-dev rpm patchelf locate libfuse2
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool && mv appimagetool /usr/local/bin/
+          
+      - name: Flutter doctor
+        run: flutter doctor
+          
+      - name: Clone project
+        run: git clone https://github.com/anandnet/Harmony-Music.git
+        
+      - name: Install Flutter distributor
+        run: |
+          dart pub global activate melos
+          git clone https://github.com/anandnet/flutter_distributor.git
+          cd flutter_distributor && git rev-parse HEAD
+          melos run activate
+
+      - name: Update lang data
+        working-directory: ./Harmony-Music
+        run: dart localization/generator.dart
+
+      - name: Set update check flag to true
+        working-directory: ./Harmony-Music/lib/utils
+        run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
+
+      - name: Build linux deb, appImage & rpm package
+        working-directory: ./Harmony-Music
+        run: |
+          flutter_distributor package --platform linux --targets deb
+          flutter_distributor package --platform linux --targets rpm
+          flutter_distributor package "target-platform=linux-x64" --platform linux --targets appimage
+          
+      - name: Upload linux binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: Harmony music linux binaries
+          path: ./Harmony-Music/dist/*
