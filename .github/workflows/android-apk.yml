@@ -18,7 +18,7 @@ jobs:
           java-version: '17'
           
       - name: Clone project
-        run: git https://github.com/technicalwhitehat-yt/RhyThm-Music
+        run: git https://github.com/technicalwhitehat-yt/RhyThm-Music.git
 
       - name: Flutter doctor
         run: flutter doctor
