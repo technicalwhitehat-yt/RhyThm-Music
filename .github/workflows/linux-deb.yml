@@ -1,0 +1,66 @@
+name: Build Linux Binaries (Final)
+on: workflow_dispatch
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    
+    defaults:
+      run:
+        working-directory: ./RhyThm-Music # <-- Sabse Zaroori Badlav
+
+    steps:
+      # Step 1: Ek temporary folder banayein aur uske andar project clone karein
+      - name: Checkout Main Repo
+        uses: actions/checkout@v4
+        with:
+          repository: 'technicalwhitehat-yt/RhyThm-Music'
+          path: 'RhyThm-Music' # <-- Project ko ek specific folder mein daalein
+
+      # Step 2: Flutter Setup karein
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.24.2'
+          
+      # Step 3: Linux ke liye zaroori dependencies install karein
+      - name: Install Linux Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmpv-dev mpv libayatana-appindicator3-dev ninja-build libgtk-3-dev rpm patchelf locate libfuse2
+
+      # --- Yahaan se Automatic Fixes Shuru Hain ---
+
+      # Step 4: Project ka naam aapon aap theek karein (Har Baar)
+      - name: Auto-correct pubspec.yaml
+        run: sed -i 's/name: rhythm-music/name: rhythm_music/g' pubspec.yaml
+
+      # Step 5: Saare Dart files ke andar ke galat imports aapon aap theek karein
+      - name: Auto-correct all Dart import paths
+        run: |
+          find . -type f -name "*.dart" -print0 | xargs -0 sed -i 's|package:rhythmmusic/|package:rhythm_music/|g'
+          find . -type f -name "*.dart" -print0 | xargs -0 sed -i 's|package:harmonymusic/|package:rhythm_music/|g'
+
+      # Step 6: Dependencies install karein (Ab yeh sahi folder mein chalega)
+      - name: Install Project Dependencies
+        run: flutter pub get
+
+      # Step 7: Bhasha ki data update karein
+      - name: Update Language Data
+        run: dart localization/generator.dart
+
+      # Step 8: Update check flag set karein
+      - name: Set Update Check Flag
+        run: echo "const updateCheckFlag = true;" > lib/utils/update_check_flag_file.dart
+
+      # Step 9: Linux binaries build karein (Sahi tareeka)
+      - name: Build Linux Binaries (deb, rpm, appimage)
+        run: dart run distributor:main package --platform linux --targets "deb,rpm,appimage"
+
+      # Step 10: Linux binaries ko upload karein
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: RhyThm-music-linux-binaries
+          path: RhyThm-Music/dist/* # <-- Sahi path se upload karein
