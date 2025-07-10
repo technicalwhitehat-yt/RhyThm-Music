@@ -1,4 +1,4 @@
-name: Build Linux Binaries (Final)
+name: Build linux binaries (deb, appimage & rpm)
 on: workflow_dispatch
 
 jobs:
