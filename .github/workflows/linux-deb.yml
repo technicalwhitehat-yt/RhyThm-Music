@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      # Step 1: Sirf ek baar project ko checkout karein (Ismein aapke saare manual fixes shaamil honge)
+      # Step 1: Project ko checkout karein (Aapke saare manual fixes ke saath)
       - name: Checkout project
         uses: actions/checkout@v4
 
@@ -27,7 +27,7 @@ jobs:
       - name: Flutter doctor
         run: flutter doctor
 
-      # Step 5: Dependencies install karein (ab working-directory ki zaroorat nahi)
+      # Step 5: Dependencies install karein (Yeh sabse zaroori hai)
       - name: Install project dependencies
         run: flutter pub get
 
