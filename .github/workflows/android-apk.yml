@@ -1,73 +1,48 @@
-name: Build Android apk
+name: Build Android apk 
 on: workflow_dispatch
-
+  
 jobs:
+
   build-android-apk:
     runs-on: windows-latest
-
+    
     steps:
-      # Step 1: Puraane project ko checkout karein
-      - name: Checkout RhyThm-Music project
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
         with:
-          repository: 'technicalwhitehat-yt/RhyThm-Music'
-
-      # Step 2: Java Setup karein
-      - name: Set up Java
-        uses: actions/setup-java@v4
+          channel: 'stable'
+          flutter-version: '3.24.2'
+      - uses: actions/setup-java@v4
         with:
           distribution: 'microsoft'
           java-version: '17'
           
-      # Step 3: Flutter Setup karein
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: '3.24.2'
+      - name: Clone project
+        run: git clone https://github.com/technicalwhitehat-yt/RhyThm-Music.git
 
-      # Step 4: Flutter Doctor chalayein
       - name: Flutter doctor
         run: flutter doctor
-
-      # --- Yahaan se Asli Fix Shuru Hota Hai ---
-
-      # Step 5: NDK Version ko Theek Karein (Naya Step)
-      - name: Set NDK Version
-        run: |
-          $buildGradle = "android/app/build.gradle"
-          (Get-Content $buildGradle) -replace 'ndkVersion flutter.ndkVersion', 'ndkVersion "26.1.10909125"' | Set-Content $buildGradle
-        shell: pwsh
-
-      # Step 6: pubspec.yaml mein naam theek karein
-      - name: Fix pubspec.yaml name
-        run: |
-          (Get-Content pubspec.yaml) -replace 'name: rhythm-music', 'name: rhythm_music' | Set-Content pubspec.yaml
-        shell: pwsh
-
-      # Step 7: Saari Dart Files mein Import Paths ko Theek Karein (Sabse Zaroori Naya Step)
-      - name: Fix Dart import paths
-        run: |
-          Get-ChildItem -Path . -Filter *.dart -Recurse | ForEach-Object {
-              (Get-Content $_.FullName) -replace 'package:rhythmmusic/', 'package:rhythm_music/' -replace 'package:harmonymusic/', 'package:rhythm_music/' | Set-Content $_.FullName
-          }
-        shell: pwsh
-
-      # Step 8: Dependencies install karein
+        
       - name: Install project dependencies
+        working-directory: ./RhyThm-Music
         run: flutter pub get
 
-      # Step 9: Bhasha ki data update karein
       - name: Update lang data
+        working-directory: ./RhyThm-Music
         run: dart localization/generator.dart
 
-      # Step 10: APK Build karein
+      - name: Set update check flag to true
+        working-directory: ./RhyThm-Music/lib/utils
+        run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
+        
       - name: Build android apk
-        run: flutter build apk --split-per-abi --release
+        working-directory: ./RhyThm-Music
+        run: |
+          flutter build apk --split-per-abi --release
+          flutter build apk
 
-      # Step 11: APK ko upload karein
       - name: Upload apk artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RhyThm-music-apk
-          path: build/app/outputs/flutter-apk/*release.apk
+          name: RhyThm music apk
+          path: ./RhyThm-Music/build/app/outputs/flutter-apk/*apk
