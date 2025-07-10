@@ -1,4 +1,4 @@
-package com.twh.rhythmmusic
+package com.twh.rhythm_music
 
 import com.ryanheise.audioservice.AudioServiceActivity
 
