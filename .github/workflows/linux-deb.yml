@@ -6,8 +6,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      # Step 1: Sirf ek baar project ko checkout karein
-      # Ismein aapke saare manual fixes shaamil honge
+      # Step 1: Sirf ek baar project ko checkout karein (Ismein aapke saare manual fixes shaamil honge)
       - name: Checkout project
         uses: actions/checkout@v4
 
