@@ -39,12 +39,6 @@ jobs:
           Set-Content -Path $buildGradle -Value $newContent
         shell: pwsh
 
-      # ⭐️ NEW STEP 2: Fix pubspec.yaml name ⭐️
-      - name: Fix pubspec.yaml name
-        run: |
-          (Get-Content pubspec.yaml).replace('name: rhythm-music', 'name: rhythm_music') | Set-Content pubspec.yaml
-        shell: pwsh
-
       # ⭐️ NEW STEP 3: Fix inconsistent import paths in all Dart files ⭐️
       - name: Fix Dart import paths
         run: |
