@@ -13,21 +13,21 @@ jobs:
           flutter-version: '3.24.2'
           
       - name: Clone project
-        run: git clone https://github.com/anandnet/Harmony-Music.git
+        run: git clone https://github.com/technicalwhitehat-yt/RhyThm-Music.git
 
       - name: Flutter doctor
         run: flutter doctor
         
       - name: Install project dependencies
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: flutter pub get
 
       - name: Update lang data
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: dart localization/generator.dart
 
       - name: Set update check flag to true
-        working-directory: ./Harmony-Music/lib/utils
+        working-directory: ./RhyThm-Music/lib/utils
         run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
           
       - name: install required deps for linux package
@@ -38,7 +38,7 @@ jobs:
         run: flutter doctor
 
       - name: Build linux deb package
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: |
           dart pub global activate flutter_distributor
           flutter_distributor package --platform linux --targets deb
@@ -46,8 +46,8 @@ jobs:
       - name: Upload linux deb artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Harmony music linux deb
-          path: ./Harmony-Music/dist/*
+          name: RhyThm music linux deb
+          path: ./RhyThm-Music/dist/*
 
   build-android-apk-and-windows-exe:
     runs-on: windows-latest
@@ -64,25 +64,25 @@ jobs:
           java-version: '17'
           
       - name: Clone project
-        run: git clone https://github.com/anandnet/Harmony-Music.git
+        run: git clone https://github.com/technicalwhitehat-yt/RhyThm-Music.git
 
       - name: Flutter doctor
         run: flutter doctor
         
       - name: Install project dependencies
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: flutter pub get
 
       - name: Update lang data
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: dart localization/generator.dart
 
       - name: Set update check flag to true
-        working-directory: ./Harmony-Music/lib/utils
+        working-directory: ./RhyThm-Music/lib/utils
         run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
         
       - name: Build android apk
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: |
           flutter build apk --split-per-abi --release
           flutter build apk
@@ -90,11 +90,11 @@ jobs:
       - name: Upload apk artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Harmony music apk
-          path: ./Harmony-Music/build/app/outputs/flutter-apk/*apk
+          name: RhyThm music apk
+          path: ./RhyThm-Music/build/app/outputs/flutter-apk/*apk
 
       - name: Build windows exe package
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: |
           dart pub global activate flutter_distributor
           flutter_distributor package --platform windows --targets exe
@@ -102,8 +102,8 @@ jobs:
       - name: Upload Windows exe artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Harmony music windows exe
-          path: ./Harmony-Music/dist/*
+          name: RhyThm music windows exe
+          path: ./RhyThm-Music/dist/*
 
   build-ios-ipa:
     runs-on: macos-latest
@@ -116,42 +116,42 @@ jobs:
           flutter-version: '3.24.2'
 
       - name: Clone project
-        run: git clone https://github.com/anandnet/Harmony-Music.git
+        run: git clone https://github.com/technicalwhitehat-yt/RhyThm-Music.git
 
       - name: Flutter doctor
         run: flutter doctor
         
       - name: Install project dependencies
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: flutter pub get
 
       - name: Update lang data
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: dart localization/generator.dart
 
       - name: Set update check flag to true
-        working-directory: ./Harmony-Music/lib/utils
+        working-directory: ./RhyThm-Music/lib/utils
         run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
 
       - name: release ios package
-        working-directory: ./Harmony-Music
+        working-directory: ./RhyThm-Music
         run: flutter build ios --release --no-codesign
 
       - run: mkdir Payload
-        working-directory: ./Harmony-Music/build/ios/iphoneos
+        working-directory: ./RhyThm-Music/build/ios/iphoneos
 
       - run: mv Runner.app/ Payload
-        working-directory: ./Harmony-Music/build/ios/iphoneos
+        working-directory: ./RhyThm-Music/build/ios/iphoneos
 
       - name: Zip output
-        run: zip -qq -r -9 harmonymusic.ipa Payload
-        working-directory: ./Harmony-Music/build/ios/iphoneos
+        run: zip -qq -r -9 rhythmmusic.ipa Payload
+        working-directory: ./RhyThm-Music/build/ios/iphoneos
 
       - name: Upload ios ipa artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Harmony music ios ipa
-          path: ./Harmony-Music/build/ios/iphoneos/harmonymusic.ipa
+          name: RhyThm music ios ipa
+          path: ./RhyThm-Music/build/ios/iphoneos/rhythmmusic.ipa
       
 
       
