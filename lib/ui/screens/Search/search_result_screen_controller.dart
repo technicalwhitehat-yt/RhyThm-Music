@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/ui/screens/Settings/settings_screen_controller.dart';
+import 'package:rhythm_music/ui/screens/Settings/settings_screen_controller.dart';
 
 import '../../../utils/helper.dart';
 import '../Home/home_screen_controller.dart';

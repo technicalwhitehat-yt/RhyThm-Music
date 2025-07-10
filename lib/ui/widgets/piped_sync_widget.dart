@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/utils/helper.dart';
+import 'package:rhythm_music/utils/helper.dart';
 
 import '../screens/Library/library_controller.dart';
 import 'snackbar.dart';

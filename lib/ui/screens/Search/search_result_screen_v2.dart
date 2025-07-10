@@ -1,8 +1,8 @@
 import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/ui/widgets/loader.dart';
-import 'package:rhythmmusic/ui/widgets/search_related_widgets.dart';
+import 'package:rhythm_music/ui/widgets/loader.dart';
+import 'package:rhythm_music/ui/widgets/search_related_widgets.dart';
 
 import '../../navigator.dart';
 import '../../widgets/separate_tab_item_widget.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/ui/utils/theme_controller.dart';
+import 'package:rhythm_music/ui/utils/theme_controller.dart';
 
 class CustSwitch extends StatelessWidget {
   const CustSwitch({super.key, this.onChanged, required this.value});

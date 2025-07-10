@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/ui/screens/Library/library_controller.dart';
+import 'package:rhythm_music/ui/screens/Library/library_controller.dart';
 
 import 'additional_operation_dialog.dart';
 import 'modified_text_field.dart';

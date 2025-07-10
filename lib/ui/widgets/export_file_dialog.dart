@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/ui/screens/Settings/settings_screen_controller.dart';
-import 'package:rhythmmusic/ui/widgets/loader.dart';
+import 'package:rhythm_music/ui/screens/Settings/settings_screen_controller.dart';
+import 'package:rhythm_music/ui/widgets/loader.dart';
 
 import '../../services/permission_service.dart';
 import 'common_dialog_widget.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/ui/widgets/common_dialog_widget.dart';
-import 'package:rhythmmusic/ui/widgets/sort_widget.dart';
+import 'package:rhythm_music/ui/widgets/common_dialog_widget.dart';
+import 'package:rhythm_music/ui/widgets/sort_widget.dart';
 
 import 'custom_button.dart';
 import 'modification_list.dart';

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/models/album.dart';
-import 'package:rhythmmusic/models/artist.dart';
+import 'package:rhythm_music/models/album.dart';
+import 'package:rhythm_music/models/artist.dart';
 
-import 'package:rhythmmusic/ui/screens/Artists/artist_screen.dart';
-import 'package:rhythmmusic/ui/screens/Home/home_screen.dart';
+import 'package:rhythm_music/ui/screens/Artists/artist_screen.dart';
+import 'package:rhythm_music/ui/screens/Home/home_screen.dart';
 
 import 'screens/Album/album_screen.dart';
 import 'screens/Playlist/playlist_screen.dart';

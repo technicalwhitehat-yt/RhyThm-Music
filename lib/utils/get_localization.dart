@@ -1608,9 +1608,7 @@ Map<String, Map<String, String>> get keys => {
   "resetToDefaultDes": "Reset app settings to default (Restart required)",
   "resetToDefaultMsg": "Settings reset to default completed, Please restart app",
   "github": "🎶 Made for Someone Special 🌟",
-  "githubDes": "This RhyThm app wouldn't exist if that one person hadn't gotten upset.
-Sometimes, emotions create the most beautiful things. ❤ \nThank you for being unknowingly inspiring. ✨
-\n\nif you like this project, don't forget to give a ⭐ on Github",
+  "githubDes": "This RhyThm app wouldn't exist if that one person hadn't gotten upset. Sometimes, emotions create the most beautiful things. ❤ \nThank you for being unknowingly inspiring. ✨\n\nif you like this project, don't forget to give a ⭐ on Github",
   "by": "by",
   "urlSearchDes": "Url detected click on it to open/play associated content",
   "search": "Search",

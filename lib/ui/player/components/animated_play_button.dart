@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rhythmmusic/ui/player/player_controller.dart';
+import 'package:rhythm_music/ui/player/player_controller.dart';
 
 import '../../widgets/loader.dart';
 

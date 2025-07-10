@@ -1,6 +1,6 @@
 import 'dart:core';
 import 'package:flutter/services.dart';
-import 'package:rhythmmusic/services/stream_service.dart';
+import 'package:rhythm_music/services/stream_service.dart';
 
 //Not in use for now
 // Future<List<String>?> getSongUrlFromPiped(String songId,
