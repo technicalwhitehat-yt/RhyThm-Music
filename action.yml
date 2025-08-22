@@ -1,4 +1,3 @@
-
 name: 'Flutter Runner'
 description: 'Github action for apk building for flutter apps.'
 runs:
