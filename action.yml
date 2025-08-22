@@ -1,4 +1,4 @@
-name: 'Flutter Runner'
+name: 'Rhythm Music'
 description: 'Github action for apk building for flutter apps.'
 runs:
   using: 'docker'
