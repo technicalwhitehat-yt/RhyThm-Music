@@ -45,4 +45,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: RhyThm music V1.1 apk
-          path: ./RhyThm/build/app/outputs/flutter-apk/*apk
+          path: ./RhyThm-Music/build/app/outputs/flutter-apk/*apk
