@@ -1,28 +1,35 @@
-name: Build Android apk 
+name: Build Android apk
 on: workflow_dispatch
   
 jobs:
-
   build-android-apk:
     runs-on: windows-latest
-    
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version: '3.24.2'
-      - uses: actions/setup-java@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'microsoft'
           java-version: '17'
-          
-      - name: Clone project
-        run: git clone https://github.com/hiddeneyes99/RhyThm
+
+      # DEBUG: list repo contents to confirm paths (remove or keep for troubleshooting)
+      - name: Show workspace layout
+        run: |
+          pwd
+          ls -la
 
       - name: Flutter doctor
         run: flutter doctor
-        
+
       - name: Install project dependencies
         working-directory: ./RhyThm-Music
         run: flutter pub get
@@ -34,7 +41,7 @@ jobs:
       - name: Set update check flag to true
         working-directory: ./RhyThm-Music/lib/utils
         run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
-        
+
       - name: Build android apk
         working-directory: ./RhyThm-Music
         run: |
