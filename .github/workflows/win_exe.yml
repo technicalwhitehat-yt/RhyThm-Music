@@ -19,7 +19,7 @@ jobs:
         run: flutter pub get
 
       - name: Install Flutter distributor
-        run: dart pub global activate distributor
+        run: dart pub global activate flutter_distributor
 
       # --- Yahaan se Badlav Shuru Hain ---
 
@@ -44,9 +44,8 @@ jobs:
         run: echo "const updateCheckFlag = true;" > lib/utils/update_check_flag_file.dart
 
       - name: Build windows exe package
-        run: distributor package --platform windows --targets exe
+        run: flutter_distributor package --platform windows --targets exe
 
-      # (Aapke signing waale steps yahaan se shuru honge...)
       - name: Find first .exe file
         id: find_exe
         run: |
@@ -60,11 +59,10 @@ jobs:
             exit 1
           }
         shell: pwsh
-
-      # ... (Aapke baaki ke signing steps) ...
       
       - name: Upload Windows exe artifact
         uses: actions/upload-artifact@v4
         with:
           name: Rhythm music windows exe
-          path: "dist/**/*_signed.exe"
+          path: "dist/**/*.exe"
+
