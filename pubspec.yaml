@@ -76,21 +76,17 @@ dependencies:
   url_launcher: ^6.2.1
   widget_marquee: ^0.0.8
   window_manager: ^0.4.2
-  youtube_explode_dart:
-    git:
-      url: https://github.com/anandnet/youtube_explode_dart.git
-      ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024
+  youtube_explode_dart: ^3.1.0
 dev_dependencies:
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
   flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
   jnigen: ^0.14.0
+
+dependency_overrides:
+  path: ^1.9.0
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
