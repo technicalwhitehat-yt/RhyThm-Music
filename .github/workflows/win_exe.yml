@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 jobs:
   build-windows-exe:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout project

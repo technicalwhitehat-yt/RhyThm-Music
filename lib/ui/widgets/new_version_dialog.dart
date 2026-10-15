@@ -260,18 +260,18 @@ class _NewVersionDialogState extends State<NewVersionDialog>
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              accentColor.withValues(alpha: 0.16),
-                              accentColor.withValues(alpha: 0.08),
+                              accentColor.withOpacity(0.16),
+                              accentColor.withOpacity(0.08),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(
-                            color: accentColor.withValues(alpha: 0.35),
+                            color: accentColor.withOpacity(0.35),
                             width: 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: accentColor.withValues(alpha: 0.12),
+                              color: accentColor.withOpacity(0.12),
                               blurRadius: 10,
                               spreadRadius: 1,
                             ),
@@ -288,7 +288,7 @@ class _NewVersionDialogState extends State<NewVersionDialog>
                                 color: accentColor,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: accentColor.withValues(alpha: 0.8),
+                                    color: accentColor.withOpacity(0.8),
                                     blurRadius: 6,
                                     spreadRadius: 1,
                                   ),
@@ -309,13 +309,13 @@ class _NewVersionDialogState extends State<NewVersionDialog>
                             Container(
                               width: 1,
                               height: 12,
-                              color: accentColor.withValues(alpha: 0.35),
+                              color: accentColor.withOpacity(0.35),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               "Official Release",
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.75),
+                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.75),
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.2,
                                 fontSize: 11.5,
@@ -332,10 +332,10 @@ class _NewVersionDialogState extends State<NewVersionDialog>
                         constraints: const BoxConstraints(maxHeight: 200),
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: theme.scaffoldBackgroundColor.withValues(alpha: 0.65),
+                          color: theme.scaffoldBackgroundColor.withOpacity(0.65),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.08),
+                            color: Colors.white.withOpacity(0.08),
                             width: 1,
                           ),
                         ),
@@ -493,7 +493,7 @@ class _NewVersionDialogState extends State<NewVersionDialog>
           text: part,
           style: TextStyle(
             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            color: isBold ? onSurfaceColor : defaultColor.withValues(alpha: 0.90),
+            color: isBold ? onSurfaceColor : defaultColor.withOpacity(0.90),
             fontSize: 13,
             height: 1.35,
           ),
@@ -531,10 +531,10 @@ class _NewVersionDialogState extends State<NewVersionDialog>
                   height: 6,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: accentColor.withValues(alpha: 0.8),
+                    color: accentColor.withOpacity(0.8),
                     boxShadow: [
                       BoxShadow(
-                        color: accentColor.withValues(alpha: 0.45),
+                        color: accentColor.withOpacity(0.45),
                         blurRadius: 4,
                       ),
                     ],

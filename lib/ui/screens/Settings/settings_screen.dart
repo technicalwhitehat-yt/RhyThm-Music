@@ -681,13 +681,13 @@ class SettingsScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-                            Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
+                            Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                            Theme.of(context).colorScheme.secondary.withOpacity(0.05),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
                           width: 1,
                         ),
                       ),
@@ -707,7 +707,7 @@ class SettingsScreen extends StatelessWidget {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
+                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.35),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -767,7 +767,7 @@ class SettingsScreen extends StatelessWidget {
                             "Creator of RhyThm Music — An open-source, ad-free music player & streaming app designed for high-performance audio with no subscriptions and no ads.",
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   height: 1.35,
-                                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.85),
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.85),
                                 ),
                           ),
                         ],
@@ -780,7 +780,7 @@ class SettingsScreen extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00C5C5).withValues(alpha: 0.15),
+                        color: const Color(0xFF00C5C5).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
@@ -811,7 +811,7 @@ class SettingsScreen extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF0000).withValues(alpha: 0.15),
+                        color: const Color(0xFFFF0000).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
@@ -877,7 +877,7 @@ class SettingsScreen extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0088CC).withValues(alpha: 0.15),
+                        color: const Color(0xFF0088CC).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
@@ -1161,17 +1161,17 @@ class _AppStorageSelectorDialogState extends State<AppStorageSelectorDialog> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: primaryPurple.withValues(alpha: 0.25),
+                color: primaryPurple.withOpacity(0.25),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: primaryPurple.withValues(alpha: 0.12),
+                  color: primaryPurple.withOpacity(0.12),
                   blurRadius: 28,
                   offset: const Offset(0, 10),
                 ),
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
+                  color: Colors.black.withOpacity(0.06),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 ),
@@ -1199,7 +1199,7 @@ class _AppStorageSelectorDialogState extends State<AppStorageSelectorDialog> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: primaryPurple.withValues(alpha: 0.3),
+                                color: primaryPurple.withOpacity(0.3),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),
@@ -1297,7 +1297,7 @@ class _AppStorageSelectorDialogState extends State<AppStorageSelectorDialog> {
                         backgroundColor: primaryPurple,
                         foregroundColor: Colors.white,
                         elevation: 2,
-                        shadowColor: primaryPurple.withValues(alpha: 0.4),
+                        shadowColor: primaryPurple.withOpacity(0.4),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 22, vertical: 11),
                         shape: RoundedRectangleBorder(

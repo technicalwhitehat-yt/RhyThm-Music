@@ -101,15 +101,15 @@ class ContentListWidget extends StatelessWidget {
                               width: 44,
                               height: 44,
                               decoration: BoxDecoration(
-                                color: primaryColor.withValues(alpha: isDark ? 0.25 : 0.12),
+                                color: primaryColor.withOpacity(isDark ? 0.25 : 0.12),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: primaryColor.withValues(alpha: isDark ? 0.7 : 0.4),
+                                  color: primaryColor.withOpacity(isDark ? 0.7 : 0.4),
                                   width: 1.8,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: primaryColor.withValues(alpha: 0.25),
+                                    color: primaryColor.withOpacity(0.25),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
