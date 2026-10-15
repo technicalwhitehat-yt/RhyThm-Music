@@ -133,6 +133,19 @@ jobs:
         working-directory: ./RhyThm-Music/lib/utils
         run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
 
+      - name: Fix audiotags iOS native framework
+        working-directory: ./RhyThm-Music/ios
+        run: |
+          pod install || true
+          AUDIOTAGS_DIR=$(find Pods -name "audiotags.podspec" -exec dirname {} \; | head -n 1)
+          if [ -n "$AUDIOTAGS_DIR" ]; then
+            echo "Found audiotags at: $AUDIOTAGS_DIR"
+            mkdir -p "$AUDIOTAGS_DIR/Frameworks/audiotags.xcframework"
+            curl -sL "https://github.com/erikas-taroza/audiotags/releases/download/v1.4.2/ios.zip" -o "$AUDIOTAGS_DIR/ios.zip"
+            unzip -qo "$AUDIOTAGS_DIR/ios.zip" -d "$AUDIOTAGS_DIR/Frameworks/audiotags.xcframework"
+            pod install
+          fi
+
       - name: release ios package
         working-directory: ./RhyThm-Music
         run: flutter build ios --release --no-codesign
