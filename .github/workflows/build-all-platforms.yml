@@ -134,17 +134,18 @@ jobs:
         run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
 
       - name: Fix audiotags iOS native framework
-        working-directory: ./RhyThm-Music/ios
         run: |
-          pod install || true
-          AUDIOTAGS_DIR=$(find Pods -name "audiotags.podspec" -exec dirname {} \; | head -n 1)
-          if [ -n "$AUDIOTAGS_DIR" ]; then
-            echo "Found audiotags at: $AUDIOTAGS_DIR"
-            mkdir -p "$AUDIOTAGS_DIR/Frameworks/audiotags.xcframework"
-            curl -sL "https://github.com/erikas-taroza/audiotags/releases/download/v1.4.2/ios.zip" -o "$AUDIOTAGS_DIR/ios.zip"
-            unzip -qo "$AUDIOTAGS_DIR/ios.zip" -d "$AUDIOTAGS_DIR/Frameworks/audiotags.xcframework"
-            pod install
-          fi
+          PUB_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
+          for dir in $(find "$PUB_DIR" ./RhyThm-Music -name "audiotags.podspec" -exec dirname {} \; 2>/dev/null); do
+            echo "Patching audiotags at: $dir"
+            sed -i '' 's/\[ ! -d ios.zip \]d/\[ ! -d ios.zip \]/g' "$dir/audiotags.podspec" 2>/dev/null || true
+            mkdir -p "$dir/Frameworks/audiotags.xcframework"
+            curl -sL "https://github.com/erikas-taroza/audiotags/releases/download/v1.4.2/ios.zip" -o "$dir/Frameworks/ios.zip"
+            unzip -qo "$dir/Frameworks/ios.zip" -d "$dir/Frameworks/audiotags.xcframework"
+            touch "$dir/Frameworks/ios.zip"
+          done
+          cd ./RhyThm-Music/ios
+          pod install --repo-update
 
       - name: release ios package
         working-directory: ./RhyThm-Music
