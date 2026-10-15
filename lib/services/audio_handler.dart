@@ -62,6 +62,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
   bool loudnessNormalizationEnabled = false;
   // var networkErrorPause = false;
   bool isSongLoading = true;
+  int _playRequestSeq = 0;
 
   // list of shuffled queue songs ids
   List<String> shuffledQueue = [];
@@ -450,16 +451,35 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           _player.stop();
         } catch (_) {}
         final isNewUrlReq = extras['newUrl'] ?? false;
-        var currentSong = queue.value[currentIndex];
-        final futureStreamInfo =
-            checkNGetUrl(currentSong.id, generateNewUrl: isNewUrlReq);
         final bool restoreSession = extras['restoreSession'] ?? false;
+        var currentSong = queue.value[currentIndex];
+
+        final int thisRequestSeq = ++_playRequestSeq;
         isSongLoading = true;
         playbackState.add(playbackState.value
             .copyWith(processingState: AudioProcessingState.loading));
         mediaItem.add(currentSong);
-        final streamInfo = await futureStreamInfo;
-        if (songIndex != currentIndex) {
+
+        // Check if cached first for instant response without debouncing
+        final songsUrlCacheBox = Hive.box("SongsUrlCache");
+        final bool isCached = !isNewUrlReq &&
+            songsUrlCacheBox.containsKey(currentSong.id) &&
+            songsUrlCacheBox.get(currentSong.id) is Map &&
+            !isExpired(
+                url: (songsUrlCacheBox.get(currentSong.id)['highQualityAudio']?['url'] ??
+                        songsUrlCacheBox.get(currentSong.id)['lowQualityAudio']?['url'])
+                    ?.toString());
+
+        // If not cached, debounce 250ms to absorb rapid user next/prev button clicks
+        if (!isCached) {
+          await Future.delayed(const Duration(milliseconds: 250));
+          if (thisRequestSeq != _playRequestSeq || songIndex != currentIndex) {
+            return; // Outdated rapid-skip request, ignore before hitting network
+          }
+        }
+
+        final streamInfo = await checkNGetUrl(currentSong.id, generateNewUrl: isNewUrlReq);
+        if (thisRequestSeq != _playRequestSeq || songIndex != currentIndex) {
           return;
         } else if (!streamInfo.playable || streamInfo.audio == null) {
           currentSongUrl = null;
