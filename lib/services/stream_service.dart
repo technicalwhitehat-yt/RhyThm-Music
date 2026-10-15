@@ -10,26 +10,15 @@ class StreamProvider {
       {required this.playable, this.audioFormats, this.statusMSG = ""});
 
   static Future<StreamProvider> fetch(String videoId) async {
-    // LAYER 1: DIRECT INNERTUBE MOBILE API (ZERO WATCH-PAGE CALLS)
-    try {
-      final directAudio = await _fetchDirectInnertube(videoId);
-      if (directAudio != null && directAudio.isNotEmpty) {
-        return StreamProvider(
-          playable: true,
-          statusMSG: "OK",
-          audioFormats: directAudio,
-        );
-      }
-    } catch (_) {}
-
-    // LAYER 2: YOUTUBE_EXPLODE_DART WITH requireWatchPage: false ONLY
+    // LAYER 1: YOUTUBE EXPLODE WITH ANDROID CLIENT (requireWatchPage: false)
+    // Provides Muxed Tag 18 with ratebypass=yes for instant seek/skip without 403 or rate limiting
     final yt = YoutubeExplode();
     try {
       StreamManifest? res;
       try {
         res = await yt.videos.streamsClient.getManifest(
           videoId,
-          ytClients: [YoutubeApiClient.ios, YoutubeApiClient.androidVr],
+          ytClients: [YoutubeApiClient.android],
           requireWatchPage: false,
         );
       } catch (_) {
@@ -46,6 +35,7 @@ class StreamProvider {
         final List<Audio> allAudio = [];
 
         // 1. Tag 18 (muxed 360p MP4 with ratebypass=yes)
+        // Provides 128 kbps AAC audio without YouTube's 1MB SABR throttling or seek 403s
         final tag18 = res.muxed.cast<MuxedStreamInfo?>().firstWhere(
             (e) => e?.tag == 18,
             orElse: () => null);
@@ -88,6 +78,18 @@ class StreamProvider {
     } finally {
       yt.close();
     }
+
+    // LAYER 2: DIRECT INNERTUBE MOBILE API (ZERO WATCH-PAGE CALLS)
+    try {
+      final directAudio = await _fetchDirectInnertube(videoId);
+      if (directAudio != null && directAudio.isNotEmpty) {
+        return StreamProvider(
+          playable: true,
+          statusMSG: "OK",
+          audioFormats: directAudio,
+        );
+      }
+    } catch (_) {}
 
     // LAYER 3: PIPED PUBLIC API FALLBACK (EMERGENCY FAILSAFE)
     try {
