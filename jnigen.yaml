@@ -9,7 +9,7 @@ output:
 source_path:
   - 'android/app/src/main/kotlin'
 classes:
-  - 'com.twh.rhythmmusic.Equalizer'
-  - 'com.twh.rhythmmusic.SDKInt'
+  - 'com.twh.rhythm_music.Equalizer'
+  - 'com.twh.rhythm_music.SDKInt'
 
   

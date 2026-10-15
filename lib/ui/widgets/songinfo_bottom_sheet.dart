@@ -2,7 +2,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -259,7 +258,7 @@ class SongInfoBottomSheet extends StatelessWidget {
                         launchUrl(Uri.parse(
                             "https://youtube.com/watch?v=${song.id}"));
                       },
-                      icon: const Icon(Ionicons.logo_youtube),
+                      icon: const Icon(Icons.smart_display),
                     ),
                     IconButton(
                       splashRadius: 10,
@@ -267,7 +266,7 @@ class SongInfoBottomSheet extends StatelessWidget {
                         launchUrl(Uri.parse(
                             "https://music.youtube.com/watch?v=${song.id}"));
                       },
-                      icon: const Icon(Ionicons.play_circle),
+                      icon: const Icon(Icons.play_circle),
                     )
                   ],
                 ),

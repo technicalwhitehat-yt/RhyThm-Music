@@ -1,4 +1,4 @@
-package com.twh.rhythmmusic
+package com.twh.rhythm_music
 
 import android.os.Build
 import androidx.annotation.Keep

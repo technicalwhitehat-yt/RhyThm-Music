@@ -12,6 +12,7 @@ import '../ui/player/player.dart';
 import 'player/components/mini_player.dart';
 import 'player/player_controller.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'widgets/launch_splash_overlay.dart';
 import 'widgets/scroll_to_hide.dart';
 import 'widgets/sliding_up_panel.dart';
 import 'widgets/snackbar.dart';
@@ -38,7 +39,8 @@ class Home extends StatelessWidget {
             75 + Get.mediaQuery.padding.bottom;
       }
     }
-    return PopScope(
+    return LaunchSplashOverlay(
+      child: PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
@@ -206,6 +208,6 @@ class Home extends StatelessWidget {
                   ))),
         ),
       ),
-    );
+    ));
   }
 }

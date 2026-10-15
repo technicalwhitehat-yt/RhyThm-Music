@@ -26,13 +26,17 @@ class HMStreamingData {
         statusMSG: json['statusMSG'],
       );
     }
-    final lowQualityAudio = Audio.fromJson(json['lowQualityAudio']);
-    final highQualityAudio = Audio.fromJson(json['highQualityAudio']);
+    final lowQualityAudio = json['lowQualityAudio'] != null
+        ? Audio.fromJson(json['lowQualityAudio'])
+        : null;
+    final highQualityAudio = json['highQualityAudio'] != null
+        ? Audio.fromJson(json['highQualityAudio'])
+        : null;
     return HMStreamingData(
-        playable: json['playable'],
-        statusMSG: json['statusMSG'],
-        lowQualityAudio: lowQualityAudio,
-        highQualityAudio: highQualityAudio);
+        playable: json['playable'] ?? true,
+        statusMSG: json['statusMSG'] ?? "OK",
+        lowQualityAudio: lowQualityAudio ?? highQualityAudio,
+        highQualityAudio: highQualityAudio ?? lowQualityAudio);
   }
 
   Map<String, dynamic> toJson() => {

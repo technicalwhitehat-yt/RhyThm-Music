@@ -11,6 +11,7 @@ import '/utils/get_localization.dart';
 import '/services/downloader.dart';
 import '/services/piped_service.dart';
 import 'utils/app_link_controller.dart';
+import '/services/app_storage_service.dart';
 import '/services/audio_handler.dart';
 import '/services/music_service.dart';
 import '/ui/home.dart';
@@ -21,9 +22,11 @@ import 'ui/screens/Home/home_screen_controller.dart';
 import 'ui/screens/Library/library_controller.dart';
 import 'utils/system_tray.dart';
 import 'utils/update_check_flag_file.dart';
+import '/services/update_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  UpdateService.cleanOldUpdateFiles();
   await initHive();
   _setAppInitPrefs();
   startApplicationServices();
@@ -100,15 +103,9 @@ Future<void> startApplicationServices() async {
 }
 
 initHive() async {
-  String applicationDataDirectoryPath;
-  if (GetPlatform.isDesktop) {
-    applicationDataDirectoryPath =
-        "${(await getApplicationSupportDirectory()).path}/db";
-  } else {
-    applicationDataDirectoryPath =
-        (await getApplicationDocumentsDirectory()).path;
-  }
-  await Hive.initFlutter(applicationDataDirectoryPath);
+  final applicationDataDirectoryPath =
+      await AppStorageService.initAndGetActiveDataDirectory();
+  Hive.init(applicationDataDirectoryPath);
   await Hive.openBox("SongsCache");
   await Hive.openBox("SongDownloads");
   await Hive.openBox('SongsUrlCache');

@@ -2,6 +2,8 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:terminate_restart/terminate_restart.dart';
 
 import '/models/media_Item_builder.dart';
 import '/ui/player/player_controller.dart';
@@ -13,6 +15,9 @@ import '/models/quick_picks.dart';
 import '/services/music_service.dart';
 import '../Settings/settings_screen_controller.dart';
 import '/ui/widgets/new_version_dialog.dart';
+import '/services/update_service.dart';
+import '/services/permission_service.dart';
+import '/services/app_storage_service.dart';
 
 class HomeScreenController extends GetxController {
   final MusicServices _musicServices = Get.find<MusicServices>();
@@ -33,6 +38,110 @@ class HomeScreenController extends GetxController {
     super.onInit();
     loadContent();
     if (updateCheckFlag) _checkNewVersion();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    _checkStoragePermissionStartup();
+  }
+
+  Future<void> _checkStoragePermissionStartup() async {
+    if (!GetPlatform.isAndroid) return;
+    final box = Hive.box("AppPrefs");
+    final alreadyPrompted = box.get("storagePermissionPrompted") ?? false;
+    final hasPerm = await PermissionService.isStoragePermissionGranted();
+
+    if (hasPerm) {
+      // Permission already granted! Ensure external folders exist
+      await AppStorageService.ensureExternalFoldersExist();
+      return;
+    }
+
+    if (!alreadyPrompted) {
+      await Future.delayed(const Duration(milliseconds: 700));
+      if (Get.context != null && Get.context!.mounted) {
+        showDialog(
+          context: Get.context!,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
+            title: Text("appDataStorage".tr),
+            content: Text("storagePermissionStartupMsg".tr),
+            actions: [
+              TextButton(
+                child: Text("internalStorageTitle".tr),
+                onPressed: () async {
+                  await box.put("storagePermissionPrompted", true);
+                  await AppStorageService.setAppStorageType("internal");
+                  if (context.mounted) Navigator.of(context).pop();
+                },
+              ),
+              ElevatedButton(
+                child: Text("allowPermission".tr),
+                onPressed: () async {
+                  await box.put("storagePermissionPrompted", true);
+                  Navigator.of(context).pop();
+                  final granted =
+                      await PermissionService.getExtStoragePermission();
+                  if (granted) {
+                    await AppStorageService.setAppStorageType("external");
+                    await AppStorageService.ensureExternalFoldersExist();
+                    final internalDocsDir =
+                        (await getApplicationDocumentsDirectory()).path;
+                    final extFolder =
+                        AppStorageService.getActiveExternalDataFolder();
+                    await AppStorageService.copyAllHiveData(
+                      fromDir: internalDocsDir,
+                      toDir: extFolder,
+                    );
+                    if (Get.isRegistered<SettingsScreenController>()) {
+                      final sc = Get.find<SettingsScreenController>();
+                      sc.downloadLocationPath.value =
+                          AppStorageService.externalMusicFolder;
+                      sc.appStorageType.value = "external";
+                      sc.setBox.put("downloadLocationPath",
+                          AppStorageService.externalMusicFolder);
+                    }
+                    if (Get.context != null && Get.context!.mounted) {
+                      showDialog(
+                        context: Get.context!,
+                        barrierDismissible: false,
+                        builder: (ctx) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          title: Text("appDataStorage".tr),
+                          content: Text("storageMigratedMsg".tr),
+                          actions: [
+                            TextButton(
+                              child: Text("later".tr),
+                              onPressed: () => Navigator.of(ctx).pop(),
+                            ),
+                            ElevatedButton(
+                              child: Text("restartNow".tr),
+                              onPressed: () {
+                                TerminateRestart.instance.restartApp(
+                                  options: const TerminateRestartOptions(
+                                      terminate: true),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  } else {
+                    // User denied permission -> fallback to internal safely!
+                    await AppStorageService.setAppStorageType("internal");
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   Future<void> loadContent() async {
@@ -218,13 +327,17 @@ class HomeScreenController extends GetxController {
           final value = await _musicServices.getContentRelatedToSong(
               songId, getContentHlCode());
           middleContent.value = _setContentList(value);
-          if (value.isNotEmpty && (value[0]['title']).contains("like")) {
+          if (value.isNotEmpty &&
+              value[0]["contents"] is List &&
+              (value[0]["contents"] as List).isNotEmpty) {
             quickPicks_ =
-                QuickPicks(List<MediaItem>.from(value[0]["contents"]));
+                QuickPicks(List<MediaItem>.from(value[0]["contents"]),
+                    title: value[0]["title"]);
             Hive.box("AppPrefs").put("recentSongId", songId);
           }
-          // ignore: empty_catches
-        } catch (e) {}
+        } catch (e) {
+          printERROR("changeDiscoverContent BOLI error: $e");
+        }
       }
     }
     if (quickPicks_ == null) return;
@@ -258,12 +371,14 @@ class HomeScreenController extends GetxController {
     showVersionDialog.value =
         Hive.box("AppPrefs").get("newVersionVisibility") ?? true;
     if (showVersionDialog.isTrue) {
-      newVersionCheck(Get.find<SettingsScreenController>().currentVersion)
-          .then((value) {
-        if (value) {
+      UpdateService.checkLatestRelease(
+        curVer: Get.find<SettingsScreenController>().currentVersion,
+      ).then((releaseInfo) {
+        if (releaseInfo != null && releaseInfo.hasUpdate && Get.context != null) {
           showDialog(
-              context: Get.context!,
-              builder: (context) => const NewVersionDialog());
+            context: Get.context!,
+            builder: (context) => NewVersionDialog(releaseInfo: releaseInfo),
+          );
         }
       });
     }

@@ -248,7 +248,7 @@ final class $Equalizer$Type extends jni$_.JObjType<Equalizer> {
   }
 }
 
-/// from: `com.anandnet.rhythm_music.SDKInt$Companion`
+/// from: `com.twh.rhythm_music.SDKInt$Companion`
 class SDKInt$Companion extends jni$_.JObject {
   @jni$_.internal
   @core$_.override

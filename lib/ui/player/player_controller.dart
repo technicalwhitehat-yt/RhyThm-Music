@@ -308,20 +308,26 @@ class PlayerController extends GetxController
     Future.delayed(
       Duration.zero,
       () async {
-        final content = await _musicServices.getWatchPlaylist(
-            videoId: mediaItem?.id ?? "", radio: radio, playlistId: playlistid);
-        radioContinuationParam = content['additionalParamsForNext'];
-        await _audioHandler
-            .updateQueue(List<MediaItem>.from(content['tracks']));
-        if (isShuffleModeEnabled.isTrue) {
-          await _audioHandler.customAction("shuffleCmd", {"index": 0});
-        }
+        try {
+          final content = await _musicServices.getWatchPlaylist(
+              videoId: mediaItem?.id ?? "", radio: radio, playlistId: playlistid);
+          radioContinuationParam = content['additionalParamsForNext'];
+          if (content['tracks'] != null && (content['tracks'] as List).isNotEmpty) {
+            await _audioHandler
+                .updateQueue(List<MediaItem>.from(content['tracks']));
+          }
+          if (isShuffleModeEnabled.isTrue) {
+            await _audioHandler.customAction("shuffleCmd", {"index": 0});
+          }
 
-        // added here to broadcast current mediaitem via Audio Service as list is updated
-        // if radio is started on current playing song
-        if (radio && (currentSong.value?.id == mediaItem?.id)) {
-          _audioHandler
-              .customAction("upadateMediaItemInAudioService", {"index": 0});
+          // added here to broadcast current mediaitem via Audio Service as list is updated
+          // if radio is started on current playing song
+          if (radio && (currentSong.value?.id == mediaItem?.id)) {
+            _audioHandler
+                .customAction("upadateMediaItemInAudioService", {"index": 0});
+          }
+        } catch (e, st) {
+          printERROR("pushSongToQueue getWatchPlaylist error: $e\n$st");
         }
       },
     ).then((value) async {

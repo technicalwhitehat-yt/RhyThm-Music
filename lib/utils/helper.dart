@@ -163,23 +163,29 @@ void sortArtist(
 /// Return true if new version available
 Future<bool> newVersionCheck(String currentVersion) async {
   try {
-    final tags = (await Dio()
-            .get("https://api.github.com/repos/anandnet/RhyThm-Music/tags"))
-        .data;
-    final availableVersion = tags[0]['name'] as String;
-    List currentVersion_ = currentVersion.substring(1).split(".");
-    List availableVersion_ = availableVersion.substring(1).split(".");
-    if (int.parse(availableVersion_[0]) > int.parse(currentVersion_[0])) {
-      return true;
-    } else if (int.parse(availableVersion_[1]) >
-            int.parse(currentVersion_[1]) &&
-        int.parse(availableVersion_[0]) == int.parse(currentVersion_[0])) {
-      return true;
-    } else if (int.parse(availableVersion_[2]) >
-            int.parse(currentVersion_[2]) &&
-        int.parse(availableVersion_[0]) == int.parse(currentVersion_[0]) &&
-        int.parse(availableVersion_[1]) == int.parse(currentVersion_[1])) {
-      return true;
+    final response = (await Dio().get(
+      "https://api.github.com/repos/technicalwhitehat-yt/RhyThm-Music/releases/latest",
+      options: Options(headers: {"Accept": "application/vnd.github.v3+json"}),
+    )).data;
+    final tagName = response['tag_name'] as String;
+    final regExp = RegExp(r'(\d+)\.(\d+)(?:\.(\d+))?');
+    final matchNew = regExp.firstMatch(tagName);
+    final matchCur = regExp.firstMatch(currentVersion);
+
+    if (matchNew != null && matchCur != null) {
+      final newMajor = int.parse(matchNew.group(1)!);
+      final newMinor = int.parse(matchNew.group(2)!);
+      final newPatch = int.parse(matchNew.group(3) ?? "0");
+
+      final curMajor = int.parse(matchCur.group(1)!);
+      final curMinor = int.parse(matchCur.group(2)!);
+      final curPatch = int.parse(matchCur.group(3) ?? "0");
+
+      if (newMajor > curMajor) return true;
+      if (newMajor == curMajor && newMinor > curMinor) return true;
+      if (newMajor == curMajor && newMinor == curMinor && newPatch > curPatch) {
+        return true;
+      }
     }
     return false;
   } catch (e) {

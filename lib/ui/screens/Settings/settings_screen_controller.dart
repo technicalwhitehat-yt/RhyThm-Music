@@ -9,6 +9,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../utils/update_check_flag_file.dart';
+import 'package:audio_service/audio_service.dart';
+import '../../../models/media_Item_builder.dart';
+import '../Search/search_screen_controller.dart';
 import '/services/piped_service.dart';
 import '../Library/library_controller.dart';
 import '../../widgets/snackbar.dart';
@@ -17,6 +20,8 @@ import '/services/music_service.dart';
 import '/ui/player/player_controller.dart';
 import '../Home/home_screen_controller.dart';
 import '/ui/utils/theme_controller.dart';
+import '/services/app_storage_service.dart';
+import 'package:terminate_restart/terminate_restart.dart';
 
 class SettingsScreenController extends GetxController {
   late String _supportDir;
@@ -46,7 +51,8 @@ class SettingsScreenController extends GetxController {
   final backgroundPlayEnabled = true.obs;
   final restorePlaybackSession = false.obs;
   final cacheHomeScreenData = true.obs;
-  final currentVersion = "V1.12.0";
+  final currentVersion = "V2.0.0";
+  final appStorageType = "internal".obs;
 
   @override
   void onInit() {
@@ -58,6 +64,7 @@ class SettingsScreenController extends GetxController {
 
   get currentVision => currentVersion;
   get isCurrentPathsupportDownDir =>
+      downloadLocationPath.toString().startsWith(AppStorageService.externalRootFolder) ||
       "$_supportDir/Music" == downloadLocationPath.toString();
   String get supportDirPath => _supportDir;
 
@@ -68,11 +75,7 @@ class SettingsScreenController extends GetxController {
 
   Future<String> _createInAppSongDownDir() async {
     _supportDir = (await getApplicationSupportDirectory()).path;
-    final directory = Directory("$_supportDir/Music/");
-    if (!await directory.exists()) {
-      await directory.create(recursive: true);
-    }
-    return "$_supportDir/Music";
+    return await AppStorageService.getDefaultDownloadDirectory();
   }
 
   Future<void> _setInitValue() async {
@@ -102,6 +105,7 @@ class SettingsScreenController extends GetxController {
     streamingQuality.value =
         AudioQuality.values[setBox.get('streamingQuality')];
     playerUi.value = isDesktop ? 0 : (setBox.get('playerUi') ?? 0);
+    appStorageType.value = await AppStorageService.getAppStorageType();
     backgroundPlayEnabled.value = setBox.get("backgroundPlayEnabled") ?? true;
     final downloadPath =
         setBox.get('downloadLocationPath') ?? await _createInAppSongDownDir();
@@ -111,7 +115,10 @@ class SettingsScreenController extends GetxController {
             : downloadPath;
 
     exportLocationPath.value =
-        setBox.get("exportLocationPath") ?? "/storage/emulated/0/Music";
+        setBox.get("exportLocationPath") ??
+        (GetPlatform.isAndroid
+            ? AppStorageService.externalMusicFolder
+            : "/storage/emulated/0/Music");
     downloadingFormat.value = setBox.get('downloadingFormat') ?? "m4a";
     discoverContentType.value = setBox.get('discoverContentType') ?? "QP";
     slidableActionEnabled.value = setBox.get('slidableActionEnabled') ?? true;
@@ -234,8 +241,8 @@ class SettingsScreenController extends GetxController {
     } catch (e) {}
   }
 
-  void resetDownloadLocation() {
-    final defaultPath = "$_supportDir/Music";
+  void resetDownloadLocation() async {
+    final defaultPath = await AppStorageService.getDefaultDownloadDirectory();
     setBox.put("downloadLocationPath", defaultPath);
     downloadLocationPath.value = defaultPath;
   }
@@ -337,7 +344,146 @@ class SettingsScreenController extends GetxController {
     if (GetPlatform.isDesktop) {
       return "$supportDirPath/db";
     } else {
-      return (await getApplicationDocumentsDirectory()).path;
+      return AppStorageService.getActiveDataDirectory();
+    }
+  }
+
+  Future<void> changeStorageLocation(String newType, BuildContext context) async {
+    if (newType == appStorageType.value) {
+      return;
+    }
+
+    if (newType == "external") {
+      final hasPerm = await PermissionService.getExtStoragePermission();
+      if (!hasPerm) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            snackbar(context, "Storage permission is required!",
+                size: SanckBarSize.BIG),
+          );
+        }
+        return;
+      }
+    }
+
+    // Show progress dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final internalDocsDir = (await getApplicationDocumentsDirectory()).path;
+      final extDataDir = AppStorageService.getActiveExternalDataFolder();
+
+      if (newType == "external") {
+        await AppStorageService.ensureExternalFoldersExist();
+        await AppStorageService.copyAllHiveData(
+          fromDir: internalDocsDir,
+          toDir: extDataDir,
+        );
+        downloadLocationPath.value = AppStorageService.externalMusicFolder;
+        setBox.put("downloadLocationPath", AppStorageService.externalMusicFolder);
+      } else {
+        await AppStorageService.copyAllHiveData(
+          fromDir: extDataDir,
+          toDir: internalDocsDir,
+        );
+        final internalMusic = "$_supportDir/Music";
+        downloadLocationPath.value = internalMusic;
+        setBox.put("downloadLocationPath", internalMusic);
+      }
+
+      await AppStorageService.setAppStorageType(newType);
+      appStorageType.value = newType;
+
+      // Re-initialize Hive to immediately point to the new location and reopen ALL boxes
+      final targetDir = newType == "external" ? extDataDir : internalDocsDir;
+      try {
+        await Hive.close();
+        Hive.init(targetDir);
+        await Hive.openBox("SongsCache");
+        await Hive.openBox("SongDownloads");
+        await Hive.openBox('SongsUrlCache');
+        await Hive.openBox("AppPrefs");
+        await Hive.openBox("searchQuery");
+        await Hive.openBox("LibraryPlaylists");
+        await Hive.openBox("LibraryAlbums");
+        await Hive.openBox("LibraryArtists");
+        await Hive.openBox("LIBFAV");
+        await Hive.openBox("LIBRP");
+        await Hive.openBox("homeScreenData");
+        await Hive.openBox("prevSessionData");
+
+        // Refresh search screen history if active
+        if (Get.isRegistered<SearchScreenController>()) {
+          final sc = Get.find<SearchScreenController>();
+          sc.queryBox = Hive.box("searchQuery");
+          sc.historyQuerylist.value =
+              sc.queryBox.values.toList().reversed.toList();
+        }
+
+        // Refresh library songs controller if active
+        if (Get.isRegistered<LibrarySongsController>()) {
+          final lc = Get.find<LibrarySongsController>();
+          final sCache = Hive.box("SongsCache")
+              .values
+              .map<MediaItem?>((item) => MediaItemBuilder.fromJson(item))
+              .whereType<MediaItem>()
+              .toList();
+          final sDown = Hive.box("SongDownloads")
+              .values
+              .map<MediaItem?>((item) => MediaItemBuilder.fromJson(item))
+              .whereType<MediaItem>()
+              .toList();
+          lc.librarySongsList.value = [...sCache, ...sDown];
+        }
+      } catch (e) {
+        debugPrint("Error switching Hive in-memory: $e");
+      }
+
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // Dismiss loading
+      }
+
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            title: Text("appDataStorage".tr),
+            content: Text("storageMigratedMsg".tr),
+            actions: [
+              TextButton(
+                child: Text("later".tr),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+              ElevatedButton(
+                child: Text("restartNow".tr),
+                onPressed: () {
+                  if (GetPlatform.isAndroid) {
+                    TerminateRestart.instance.restartApp(
+                      options: const TerminateRestartOptions(terminate: true),
+                    );
+                  } else {
+                    exit(0);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // Dismiss loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          snackbar(context, "Error: $e", size: SanckBarSize.BIG),
+        );
+      }
     }
   }
 }

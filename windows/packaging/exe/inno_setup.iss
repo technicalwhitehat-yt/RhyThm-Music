@@ -1,6 +1,6 @@
 [Setup]
 AppId=B9F6E402-0CAE-4045-BDE6-14BD6C39C4EA
-AppVersion=1.12.0+25
+AppVersion=2.0.0+26
 AppName=RhyThm Music
 AppPublisher=anandnet
 AppPublisherURL=https://github.com/technicalwhitehat-yt/RhyThm-Music
@@ -9,7 +9,7 @@ AppUpdatesURL=https://github.com/technicalwhitehat-yt/RhyThm-Music
 DefaultDirName={autopf}\rhythm_music
 DisableProgramGroupPage=yes
 OutputDir=.
-OutputBaseFilename=rhythm_music-1.12.0
+OutputBaseFilename=rhythm_music-2.0.0
 Compression=lzma
 SolidCompression=yes
 SetupIconFile=..\..\windows\runner\resources\app_icon.ico

@@ -1,86 +1,258 @@
-# 🎵 Rhythm Music
+<p align="center">
+  <img src="img/rhythm_logo.png" alt="Rhythm Music Logo" width="130" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(124, 77, 255, 0.45);" />
+</p>
 
-## 💬 About this Update
+<h1 align="center">🎵 Rhythm Music v2.0</h1>
 
-In this new v1.1 release of Rhythm Music, we’ve fixed one of the biggest issues — the Search feature is now fully functional again! 🔍🎶
-In the previous version, some users experienced problems with song searches not working. That’s now fixed — you can instantly find your favorite tracks without any hassle ⚡
+<p align="center">
+  <b>A modern, open-source, ad-free, high-fidelity music streaming and offline player crafted with passion.</b>
+</p>
 
-## 🚀 What’s Fixed
-- ✅ **Search Results Bug Fixed** – Search now works smoothly and accurately.
-- ⚡ **Improved Speed & Stability** – The app feels faster, smoother, and more responsive.
-- 🧠 **Minor Bug Fixes** – Background performance and UI improvements for a cleaner experience.
-
-## 📦 Data Reset Information
-Once you install this new version, all previously saved data will be reset — including:
-
-- ❤️ **Liked Songs**
-- 🎵 **Imported Playlists**
-- 📜 **Song History**
-- 💡 **Personalized Recommendations**
-- 🔍 **Discover Section Preferences**
-- 💽 **Albums**
-- ⬇️ **Offline Songs**
-- 📁 **Downloaded Songs**
-This is because the app has been rebuilt from scratch for better performance and a smoother experience 💫
-
-## 🧠 Developer’s Note
-
-This update may seem small, but it comes from one purpose —
-“To make Rhythm Music better without changing its soul.” 💜
-
-If you enjoy using this version, please don’t forget to send a silent prayer 🤲
-for that someone special who made this app possible.
-Wish them happiness 🌸 and may all their dreams come true 🌟
-
-## 📱 Version Details
-
-| Info | Details |
-|-----------|-----------------|
-| App Name: | Rhythm Music               | 
-| Version:  |  v1.1 (Search Fix Update)  | 
-| Platform: | Android & Windows          | 
-| License:  |  MIT (Completely Free)     | 
-| Developer:|  Afsar Ali (Technical White Hat)  | 
-
-
-# Rhythm Music v1.1 🎶  
-
-✨ **About Rhythm Music** ✨  
-Rhythm Music ek **simple, clean aur powerful music app** hai 🎧.  
-Isse banaya gaya hai **profit ke liye nahi**, balki ek **special dedication** ke liye 💜.  
+<p align="center">
+  <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/latest"><img src="https://img.shields.io/badge/Version-v2.0.0--Stable-8A2BE2.svg?style=for-the-badge&logo=android" alt="Version 2.0.0" /></a>
+  <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License: MIT" /></a>
+  <a href="https://rhythm-music.free.nf/?i=2"><img src="https://img.shields.io/badge/Developer-Technical%20White%20Hat-7C4DFF.svg?style=for-the-badge&logo=googlechrome" alt="Developer" /></a>
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Windows-brightgreen.svg?style=for-the-badge" alt="Platforms" />
+  <img src="https://img.shields.io/badge/Ads-100%25%20Free-success.svg?style=for-the-badge" alt="Ad-Free" />
+</p>
 
 ---
 
-## 🎶 Features  
-
-- ⚡ **Smooth aur fast playback** – bina lag ke music ka asli maza lo.  
-- 🌈 **Beautiful UI** – gradient & purple tones ke saath ek fresh look.  
-- 📀 **Offline playback supported** – bina internet bhi music chalta rahega.  
-- 🎵 **Easy navigation & playlist management** – apna music apne tareeke se organize karo.  
-- 🎚️ **Built-in equalizer** – bass & treble apni pasand ke hisaab se tune karo.  
-- 🔍 **Quick search** – instantly apna favourite gana dhoondo.  
-- 🚫 **No ads, no distractions** – sirf music, sirf vibes.  
-
----
-
-## 📦 Release Assets  
-
-| File Name | Recommended For |
-|-----------|-----------------|
-| [**Rhythm-Music-V1.1.apk**](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/%F0%9F%8E%B5Rhythm_Music-v1.1/RhyThm.music.V1.1.apk) | ✅ Universal build – sabhi Android devices pe chalega (best choice if unsure) |
-| [**Rhythm-Music-arm64.apk**](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/%F0%9F%8E%B5Rhythm_Music-v1.1/app-arm64-v8a-release.apk) | Latest Android devices (64-bit ARM, most modern phones) |
-| [**Rhythm-music-armeabi-v7a.apk**](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/%F0%9F%8E%B5Rhythm_Music-v1.1/app-armeabi-v7a-release.apk) | Purane Android phones (32-bit ARM support) |
-| [**Rhythm-Music-x86_64.apk**](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/%F0%9F%8E%B5Rhythm_Music-v1.1/app-x86_64-release.apk) | Emulator ya kuch Intel-based devices ke liye |  
-| [**rhythm_music-1.1.exe**](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/%F0%9F%8E%B5Rhythm_Music-v1.1/rhythm_music-1.1.exe) | For Windows 10 & 11 |
-
-## ⚖️ License  
-
-Released under the **MIT License**.  
-Free to use, modify, aur share karo — bas **pyaar aur respect** ke saath ❤️  
+## 📖 Table of Contents
+- [About Rhythm Music](#-about-rhythm-music)
+- [What’s New in Version 2.0](#-whats-new)
+- [Screenshots & Visual Showcase](#-screenshots--visual-showcase)
+- [User Features](#-user-features)
+- [Technical Architecture & Transparency (For Developers)](#-technical-architecture--transparency-for-developers)
+- [Permissions & Privacy](#-permissions--privacy)
+- [Building from Source](#-building-from-source)
+- [Download & Release Packages](#-download--release-packages)
+- [Connect with Developer](#-connect-with-the-developer)
+- [Developer’s Note & Dedication](#-developers-note--dedication)
+- [License](#-license)
 
 ---
 
-*Enjoy the rhythm. Spread the emotion. Let the music play.* 🎶
+## 🌟 About Rhythm Music
 
+**Rhythm Music** is a high-performance, distraction-free music streaming and offline playback application built with **Flutter**. It is designed from the ground up for true music enthusiasts who appreciate pristine sound quality, modern glassmorphic aesthetics, and total privacy without commercial advertisements or paywalls.
 
+Whether streaming trending global hits or playing locally downloaded audio with synchronized lyrics and a custom equalizer, Rhythm Music delivers an ultra-smooth, responsive experience.
 
+---
+
+## 🚀 What’s New
+
+*(This section is directly formatted for GitHub Release notes and the in-app OTA update dialog)*
+
+- ⚡ **Instant Track Switching** – Tap any song while playing to instantly halt the current track and buffer the new one with zero lag or audio overlap.
+- 🔄 **In-App Smart OTA Update System** – Automated background update checks with a glassmorphic dialog, real-time download progress, and one-tap APK installation.
+- 💾 **Smart App Data Storage Selector** – Flexible storage management: choose between default isolated internal app storage or external device storage (`/Data` or `/.data`) with live non-destructive data migration.
+- 🎨 **Modern Purple & White Glassmorphic UI** – Refreshed dialogues, smooth contrast in both Light and Dark themes, sleek purple gradients, and fluid micro-animations.
+- 🔍 **Direct Search Discovery Shortcut** – Dedicated search shortcut button added to "You Might Also Like" and "Quick Picks" for instantaneous browsing.
+- 👤 **Creator & Developer Hub** – Direct in-app integration of developer profile, official logo, and one-tap access to the Technical White Hat Portfolio.
+- 🛠️ **Under-The-Hood Optimizations** – Upgraded Hive database handling, resolved background playback concurrency, refined media housekeeping, and improved battery efficiency.
+
+---
+
+## 📸 Screenshots & Visual Showcase
+
+Explore the aesthetics and user interface of **Rhythm Music 2.0**:
+
+### 🏠 Home, Search & Now Playing
+
+| 🏠 Home Screen | 🔍 Instant Search | 🎶 Now Playing Player UI |
+|:---:|:---:|:---:|
+| <img src="img/Home-page.png" width="240" alt="Home Screen" /> | <img src="img/Search-results.png" width="240" alt="Search Results" /> | <img src="img/Player-ui.png" width="240" alt="Player UI" /> |
+| *Personalized recommendations, Quick Picks & trending music* | *Instant search with artist, album & track suggestions* | *Glassmorphic player with high-res artwork & controls* |
+
+---
+
+### 📑 Up Next Queue, Favorites & User Library
+
+| 📑 Up Next Queue | ❤️ Likes & Favorites | 📚 User Library |
+|:---:|:---:|:---:|
+| <img src="img/Upnext.png" width="240" alt="Up Next Queue" /> | <img src="img/Like&fav.png" width="240" alt="Likes & Favorites" /> | <img src="img/Library.png" width="240" alt="Library" /> |
+| *Dynamic queue management, drag-to-reorder & instant play* | *Quick access to all your favorite tracks with one tap* | *Organized collections of playlists, albums, artists & downloads* |
+
+---
+
+### 🎛️ Playlists, Settings, Storage & Player Features
+
+| 📁 Playlists Management | ⚙️ App Settings | 💾 Storage Location Selector | 🎚️ Player Extra Features |
+|:---:|:---:|:---:|:---:|
+| <img src="img/Playlits.png" width="205" alt="Playlists" /> | <img src="img/Setting.png" width="205" alt="Settings Screen" /> | <img src="img/App-data-location.png" width="205" alt="App Data Location" /> | <img src="img/Player-other-features.png" width="205" alt="Player Features" /> |
+| *Create, edit & import custom playlists* | *Audio quality, themes & in-app updater* | *Switch between Internal & External storage* | *Equalizer, synced lyrics & sleep timer* |
+
+---
+
+## ✨ User Features
+
+- 🚫 **100% Ad-Free Experience**: No banner ads, no popups, and no audio interruptions.
+- 🎧 **High-Fidelity Audio Streaming**: Stream music with pristine clarity and adaptive bitrate caching.
+- 📴 **Offline Mode & Smart Cache**: Download songs or play pre-cached audio without consuming internet data.
+- 🎚️ **Built-in Equalizer & Audio Effects**: Customize frequency bands, bass boost, and virtualizer for your headphones.
+- 📜 **Real-Time Synced Lyrics**: Follow along with karaoke-style synchronized lyrics.
+- 🔄 **One-Tap In-App Updates**: Stay updated with the latest features effortlessly without visiting external websites.
+- 💾 **Customizable Storage**: Keep your data in the secure app sandbox or external storage to preserve your library across app reinstalls.
+- 🎨 **Aesthetic Themes**: AMOLED Pitch Black, Rich Purple Velvet, and adaptive light/dark glassmorphic accents.
+
+---
+
+## 🛠️ Technical Architecture & Transparency (For Developers)
+
+For total transparency and open-source collaboration, here is an overview of how Rhythm Music 2.0 is built:
+
+### 🧩 Tech Stack & Dependencies
+
+| Component | Technology | Description |
+|:---|:---|:---|
+| **Framework** | [Flutter](https://flutter.dev) (v3.47+) | Cross-platform UI toolkit compiling to native ARM/x86 code |
+| **Language** | [Dart](https://dart.dev) (v3.13+) | Strongly typed, null-safe asynchronous programming |
+| **Audio Engine** | `just_audio` & `audio_service` | Low-latency audio playback pipeline with Android background service |
+| **Local Storage** | `hive` & `hive_flutter` | Lightweight, fast key-value NoSQL database for settings and playlists |
+| **State Management** | `get` (GetX) | Reactive state management, dependency injection, and micro-routing |
+| **Network & API** | `dio` & `http` | HTTP client with connection pooling, retries, and streaming support |
+| **Lyrics Parser** | `flutter_lyric` | LRC file parser supporting synchronized live timestamp scrolling |
+| **App Updates** | Native Android Intent & `path_provider` | Download manager with FileProvider integration for APK installation |
+
+### 📂 Architecture Overview
+
+```
+RhyThm-Music-2.0/
+├── android/               # Android native configuration, permissions & FileProvider
+├── assets/                # App icons, audio assets, and default placeholders
+│   └── icons/             # Rhythm Music logos and developer avatar
+├── img/                   # Official app screenshots and showcase assets
+├── lib/
+│   ├── main.dart          # App entry point, storage initialization & theme bootstrap
+│   ├── services/          # Core background services:
+│   │   ├── app_storage_service.dart   # Storage path resolver & live migration engine
+│   │   ├── update_service.dart        # GitHub release checker & background APK downloader
+│   │   ├── piped_service.dart         # Music stream & metadata resolver
+│   │   └── audio_handler.dart         # Background audio session & notification controller
+│   ├── ui/
+│   │   ├── screens/       # Home, Search, Library, Playlists & Settings views
+│   │   ├── player/        # Fullscreen player, Mini-player, Lyrics & Equalizer
+│   │   └── widgets/       # Glassmorphic dialogs, update modal & storage selector
+│   └── utils/             # Localization, helper functions & housekeeping utilities
+└── windows/               # Windows native desktop support files
+```
+
+### 💾 Storage Architecture & Live Database Migration
+
+Rhythm Music 2.0 introduces a dual-storage model:
+1. **Internal Storage (Default)**: Uses Android's internal app sandbox directory (`/data/user/0/com.twh.rhythm_music/files`). This is completely private and secure.
+2. **External Storage (Optional)**: Uses device primary storage (`/storage/emulated/0/Data` or `/.data`). When enabled, your playlists, song history, and downloaded tracks remain intact even if the application is uninstalled or refreshed.
+3. **Live Migration**: When you toggle storage in Settings, the `AppStorageService` seamlessly copies all Hive database boxes, closes active memory instances, repoints `Hive.init()`, and re-opens all boxes in memory without requiring an app restart.
+
+---
+
+## 🔒 Permissions & Privacy
+
+Rhythm Music respects user privacy and only requests permissions essential for core functionality:
+
+| Permission | Purpose |
+|:---|:---|
+| `INTERNET` | To stream audio, fetch search queries, download lyrics, and check for OTA updates. |
+| `FOREGROUND_SERVICE` | To keep the music playing smoothly in the background when the screen is locked. |
+| `READ/WRITE_EXTERNAL_STORAGE` & `MANAGE_EXTERNAL_STORAGE` | Required on Android 10+ only when you choose the **External Storage** option to save/load music data to device folders. |
+| `REQUEST_INSTALL_PACKAGES` | Required to trigger the Android package installer when updating the app via the In-App Updater. |
+| `POST_NOTIFICATIONS` | Required on Android 13+ to display the media playback notification with controls. |
+
+*Rhythm Music does NOT collect, sell, or track any personal user data. All history and favorites reside strictly on your device.*
+
+---
+
+## 💻 Building from Source
+
+To build and compile Rhythm Music 2.0 locally:
+
+### Prerequisites
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (`v3.24.0` or higher)
+- [Android Studio / Android SDK](https://developer.android.com/studio) (API 34+)
+- [Git](https://git-scm.com/)
+
+### Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/technicalwhitehat-yt/RhyThm-Music.git
+cd RhyThm-Music
+
+# 2. Install dependencies
+flutter pub get
+
+# 3. Build Universal APK (Recommended for all devices)
+flutter build apk --release
+
+# 4. Or build ABI-Split APKs (Optimized size)
+flutter build apk --release --split-per-abi
+
+# 5. Build for Windows Desktop
+flutter build windows --release
+```
+
+Compiled APKs will be located in:
+`build/app/outputs/flutter-apk/`
+
+---
+
+## 📦 Download & Release Packages
+
+Download the official **v2.0.0** release for your specific architecture:
+
+| Package | Recommended For | Link |
+|:---|:---|:---:|
+| 🌟 **Universal APK**<br>`RhyThm-Music-v2.0.0-universal.apk` | **All Android devices** (Best choice if you are unsure) | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
+| ⚡ **arm64-v8a APK**<br>`RhyThm-Music-v2.0.0-arm64-v8a.apk` | Modern 64-bit Android smartphones (Snapdragon, MediaTek, Tensor, Exynos) | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
+| 📱 **armeabi-v7a APK**<br>`RhyThm-Music-v2.0.0-armeabi-v7a.apk` | Older 32-bit Android phones (Legacy devices) | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
+| 💻 **x86_64 APK**<br>`RhyThm-Music-v2.0.0-x86_64.apk` | Android PC Emulators (BlueStacks, LDPlayer) & Intel/AMD Android tablets | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
+| 🖥️ **Windows Executable**<br>`rhythm_music-v2.0.exe` | Windows 10 & Windows 11 (64-bit) | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
+
+---
+
+## 🌐 Connect with the Developer
+
+Stay updated with new releases, tutorials, and development logs:
+
+<p align="center">
+  <a href="https://rhythm-music.free.nf/?i=2"><img src="https://img.shields.io/badge/Portfolio-Technical%20White%20Hat-7C4DFF?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Portfolio" /></a>
+  <a href="https://www.youtube.com/@technicalwhitehat"><img src="https://img.shields.io/badge/YouTube-Technical%20White%20Hat-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube" /></a>
+  <a href="https://t.me/technicalwhitehat"><img src="https://img.shields.io/badge/Telegram-Community-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" /></a>
+  <a href="https://www.instagram.com/technicalwhitehat"><img src="https://img.shields.io/badge/Instagram-Follow%20Updates-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram" /></a>
+  <a href="https://github.com/technicalwhitehat-yt"><img src="https://img.shields.io/badge/GitHub-technicalwhitehat--yt-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+</p>
+
+- 🌐 **Official Website / Portfolio**: [https://rhythm-music.free.nf/?i=2](https://rhythm-music.free.nf/?i=2)
+- 📺 **YouTube**: [@technicalwhitehat](https://www.youtube.com/@technicalwhitehat)
+- 💬 **Telegram Community**: [@technicalwhitehat](https://t.me/technicalwhitehat)
+- 📸 **Instagram**: [@technicalwhitehat](https://www.instagram.com/technicalwhitehat)
+- 🐙 **GitHub Organization**: [@technicalwhitehat-yt](https://github.com/technicalwhitehat-yt)
+
+---
+
+## 🧠 Developer’s Note & Dedication
+
+> *“To make Rhythm Music better without changing its soul.”* 💜
+>
+> Rhythm Music is not just an application; it is built with heartfelt devotion and dedicated to that someone special who made this journey meaningful.
+>
+> If you enjoy using this application, please offer a silent prayer 🤲 for them — wish them eternal happiness 🌸 and that all their dreams come true 🌟.
+
+**Lead Developer**: **Technical White Hat** (Afsar Ali)
+
+---
+
+## ⚖️ License
+
+Distributed under the **MIT License**.  
+Free to use, customize, and distribute with love and respect ❤️.
+
+See the [LICENSE](file:///a:/RhyThm-Music-2.0/LICENSE) file for complete details.
+
+---
+
+<p align="center">
+  <b>Enjoy the rhythm. Spread the emotion. Let the music play. 🎶</b>
+</p>

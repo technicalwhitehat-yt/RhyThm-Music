@@ -14,6 +14,7 @@ import '../ui/screens/Playlist/playlist_screen_controller.dart';
 import '/services/stream_service.dart';
 import '../ui/widgets/snackbar.dart';
 import '/services/permission_service.dart';
+import '/services/app_storage_service.dart';
 import '../ui/screens/Settings/settings_screen_controller.dart';
 import '/utils/helper.dart';
 import '/models/media_Item_builder.dart';
@@ -35,17 +36,50 @@ class Downloader extends GetxService {
 
   Future<bool> checkPermissionNDir() async {
     final settingsScreenController = Get.find<SettingsScreenController>();
+    final isExternal = settingsScreenController.downloadLocationPath.string
+            .startsWith(AppStorageService.externalRootFolder) ||
+        settingsScreenController.appStorageType.value == "external";
 
-    if (!settingsScreenController.isCurrentPathsupportDownDir &&
-        !await PermissionService.getExtStoragePermission()) {
-      return false;
+    if (isExternal && GetPlatform.isAndroid) {
+      final hasPerm = await PermissionService.getExtStoragePermission();
+      if (!hasPerm) {
+        // User denied external permission -> fallback to internal music folder safely!
+        final internalPath = "${settingsScreenController.supportDirPath}/Music";
+        settingsScreenController.downloadLocationPath.value = internalPath;
+        final dir = Directory(internalPath);
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+        return true;
+      }
+      await AppStorageService.ensureExternalFoldersExist();
+    } else if (!settingsScreenController.isCurrentPathsupportDownDir) {
+      final hasPerm = await PermissionService.getExtStoragePermission();
+      if (!hasPerm) {
+        final internalPath = "${settingsScreenController.supportDirPath}/Music";
+        settingsScreenController.downloadLocationPath.value = internalPath;
+        final dir = Directory(internalPath);
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+        return true;
+      }
     }
 
-    final dirPath =
-        Get.find<SettingsScreenController>().downloadLocationPath.string;
+    var dirPath = settingsScreenController.downloadLocationPath.string;
     final directory = Directory(dirPath);
     if (!await directory.exists()) {
-      await directory.create(recursive: true);
+      try {
+        await directory.create(recursive: true);
+      } catch (e) {
+        // Fallback to internal if external directory cannot be created
+        final internalPath = "${settingsScreenController.supportDirPath}/Music";
+        settingsScreenController.downloadLocationPath.value = internalPath;
+        final fallbackDir = Directory(internalPath);
+        if (!await fallbackDir.exists()) {
+          await fallbackDir.create(recursive: true);
+        }
+      }
     }
     return true;
   }
@@ -181,106 +215,151 @@ class Downloader extends GetxService {
       return complete.future;
     }
 
-    Audio requiredAudioStream = downloadingFormat == "opus"
-        ? playerResponse.highestBitrateOpusAudio!
-        : playerResponse.highestBitrateMp4aAudio!;
+    Audio requiredAudioStream = (downloadingFormat == "opus"
+            ? playerResponse.highestBitrateOpusAudio
+            : playerResponse.highestBitrateMp4aAudio) ??
+        playerResponse.highestQualityAudio ??
+        playerResponse.audioFormats!.first;
 
-    final dirPath = settingsScreenController.downloadLocationPath.string;
-    final actualDownformat =
+    var dirPath = settingsScreenController.downloadLocationPath.string;
+    final dir = Directory(dirPath);
+    if (!await dir.exists()) {
+      try {
+        await dir.create(recursive: true);
+      } catch (e) {
+        dirPath = "${settingsScreenController.supportDirPath}/Music";
+        final fallbackDir = Directory(dirPath);
+        if (!await fallbackDir.exists()) {
+          await fallbackDir.create(recursive: true);
+        }
+      }
+    }
+
+    var actualDownformat =
         requiredAudioStream.audioCodec.name.contains("mp") ? "m4a" : "opus";
     final RegExp invalidChar =
         RegExp(r'Container.|\/|\\|\"|\<|\>|\*|\?|\:|\!|\[|\]|\¡|\||\%');
     final songTitle = "${song.title.trim()} (${song.artist?.trim()})"
         .replaceAll(invalidChar, "");
-    String filePath = "$dirPath/$songTitle.$actualDownformat";
+    var filePath = "$dirPath/$songTitle.$actualDownformat";
     printINFO("Downloading filePath: $filePath");
-    final totalBytes = requiredAudioStream.size;
 
-    _dio.download(
-        requiredAudioStream.url,
-        options: Options(headers: {"Range": 'bytes=0-$totalBytes'}),
-        filePath, onReceiveProgress: (count, total) {
-      if (total <= 0) return;
-      songDownloadingProgress.value = ((count / total) * 100).toInt();
-    }).then(
-      (value) async {
-        printINFO(value.data);
-
-        String? year;
-        try {
-          if (song.extras?['year'] != null) {
-            year = song.extras?['year'];
-          } else {
-            if (song.album != null) {
-              final musicServ = Get.find<MusicServices>();
-              year = await musicServ.getSongYear(song.id);
-            }
-          }
-        } catch (_) {}
-
-        // Save Thumbnail
-        try {
-          final thumbnailPath =
-              "${settingsScreenController.supportDirPath}/thumbnails/${song.id}.png";
-          await _dio.downloadUri(song.artUri!, thumbnailPath);
-          // ignore: empty_catches
-        } catch (e) {}
-
-        song.extras?['url'] = filePath;
-        final songJson = MediaItemBuilder.toJson(song);
-        final streamInfoJson = requiredAudioStream.toJson();
-        streamInfoJson['url'] = filePath;
-        // [playbility status, info map]
-        songJson["streamInfo"] = [true, streamInfoJson];
-
-        Hive.box("SongDownloads").put(song.id, songJson);
-        Get.find<LibrarySongsController>().librarySongsList.add(song);
-        printINFO("Downloaded successfully");
-
-        final trackDetails = (song.extras?['trackDetails'])?.split("/");
-        final int? trackNumber = int.tryParse(trackDetails?[0] ?? "");
-        final int? totalTracks = int.tryParse(trackDetails?[1] ?? "");
-
-        try {
-          /// Reverted -- Removed AudioTags as using this package, app is flagged as TROJ_GEN.R002V01K623 by TrendMicro-HouseCall
-          final imageUrl = song.artUri!.toString();
-          Tag tag = Tag(
-              title: song.title,
-              trackArtist: song.artist,
-              album: song.album,
-              year: int.tryParse(year ?? ""),
-              trackNumber: trackNumber,
-              trackTotal: totalTracks,
-              albumArtist: song.artist,
-              genre: song.genre,
-              pictures: [
-                Picture(
-                    bytes: (await NetworkAssetBundle(Uri.parse((imageUrl)))
-                            .load(imageUrl))
-                        .buffer
-                        .asUint8List(),
-                    mimeType: MimeType.png,
-                    pictureType: PictureType.coverFront)
-              ]);
-
-          await AudioTags.write(filePath, tag);
-        } catch (e) {
-          printERROR("$e");
-        }
-        complete.complete();
-      },
-    ).onError(
-      (error, stackTrace) {
-        ScaffoldMessenger.of(Get.context!).showSnackBar(snackbar(
-            Get.context!, "downloadError3".tr,
-            size: SanckBarSize.BIG,
-            duration: const Duration(seconds: 2),
-            top: !GetPlatform.isDesktop));
-        printINFO(
-            "Downloading failed due to network/stream error! Please try again");
-        complete.complete();
-      },
+    final tag18 = playerResponse.audioFormats?.cast<Audio?>().firstWhere(
+      (item) => item?.itag == 18,
+      orElse: () => null,
     );
+
+    Future<void> executeDownload(Audio audioStream, String destPath) async {
+      final bytes = audioStream.size;
+      await _dio.download(
+        audioStream.url,
+        destPath,
+        options: Options(
+          headers: {
+            "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            if (bytes > 0) "Range": 'bytes=0-$bytes',
+          },
+        ),
+        onReceiveProgress: (count, total) {
+          if (total <= 0) return;
+          songDownloadingProgress.value = ((count / total) * 100).toInt();
+        },
+      );
+    }
+
+    try {
+      try {
+        await executeDownload(requiredAudioStream, filePath);
+      } catch (e) {
+        if (tag18 != null && requiredAudioStream.itag != 18) {
+          printINFO(
+              "Primary download stream failed ($e), falling back to unthrottled Tag 18...");
+          actualDownformat = "m4a";
+          filePath = "$dirPath/$songTitle.$actualDownformat";
+          requiredAudioStream = tag18;
+          await executeDownload(tag18, filePath);
+        } else {
+          rethrow;
+        }
+      }
+
+      printINFO("Downloaded stream successfully to $filePath");
+
+      String? year;
+      try {
+        if (song.extras?['year'] != null) {
+          year = song.extras?['year'];
+        } else {
+          if (song.album != null) {
+            final musicServ = Get.find<MusicServices>();
+            year = await musicServ.getSongYear(song.id);
+          }
+        }
+      } catch (_) {}
+
+      // Save Thumbnail
+      try {
+        final thumbDir = Directory(
+            "${settingsScreenController.supportDirPath}/thumbnails");
+        if (!await thumbDir.exists()) {
+          await thumbDir.create(recursive: true);
+        }
+        final thumbnailPath = "${thumbDir.path}/${song.id}.png";
+        await _dio.downloadUri(song.artUri!, thumbnailPath);
+      } catch (e) {}
+
+      song.extras?['url'] = filePath;
+      final songJson = MediaItemBuilder.toJson(song);
+      final streamInfoJson = requiredAudioStream.toJson();
+      streamInfoJson['url'] = filePath;
+      // [playbility status, info map]
+      songJson["streamInfo"] = [true, streamInfoJson];
+
+      Hive.box("SongDownloads").put(song.id, songJson);
+      Get.find<LibrarySongsController>().librarySongsList.add(song);
+      printINFO("Downloaded successfully");
+
+      final trackDetails = (song.extras?['trackDetails'])?.split("/");
+      final int? trackNumber = int.tryParse(trackDetails?[0] ?? "");
+      final int? totalTracks = int.tryParse(trackDetails?[1] ?? "");
+
+      try {
+        final imageUrl = song.artUri!.toString();
+        Tag tag = Tag(
+            title: song.title,
+            trackArtist: song.artist,
+            album: song.album,
+            year: int.tryParse(year ?? ""),
+            trackNumber: trackNumber,
+            trackTotal: totalTracks,
+            albumArtist: song.artist,
+            genre: song.genre,
+            pictures: [
+              Picture(
+                  bytes: (await NetworkAssetBundle(Uri.parse((imageUrl)))
+                          .load(imageUrl))
+                      .buffer
+                      .asUint8List(),
+                  mimeType: MimeType.png,
+                  pictureType: PictureType.coverFront)
+            ]);
+
+        await AudioTags.write(filePath, tag);
+      } catch (e) {
+        printERROR("$e");
+      }
+      complete.complete();
+    } catch (error, stackTrace) {
+      ScaffoldMessenger.of(Get.context!).showSnackBar(snackbar(
+          Get.context!, "downloadError3".tr,
+          size: SanckBarSize.BIG,
+          duration: const Duration(seconds: 2),
+          top: !GetPlatform.isDesktop));
+      printINFO(
+          "Downloading failed due to network/stream error: $error");
+      complete.complete();
+    }
 
     return complete.future;
   }

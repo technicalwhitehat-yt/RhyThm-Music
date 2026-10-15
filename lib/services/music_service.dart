@@ -7,8 +7,9 @@ import 'package:get/get.dart' as getx;
 import 'package:hive/hive.dart';
 
 import '/models/album.dart';
+import '/models/artist.dart';
+import '/models/playlist.dart';
 import '/services/utils.dart';
-import '../utils/helper.dart';
 import 'constant.dart';
 import 'continuations.dart';
 import 'nav_parser.dart';
@@ -67,7 +68,7 @@ class MusicServices extends getx.GetxService {
           'id': visitorData['id'],
           'exp': DateTime.now().millisecondsSinceEpoch ~/ 1000 + 2590200
         });
-        printINFO("Got Visitor id ($visitorData['id']) from Box");
+        // Got Visitor id from Box
         return;
       }
     }
@@ -75,7 +76,7 @@ class MusicServices extends getx.GetxService {
     final visitorId = await genrateVisitorId();
     if (visitorId != null) {
       _headers['X-Goog-Visitor-Id'] = visitorId;
-      printINFO("New Visitor id generated ($visitorId)");
+      // New Visitor id generated
       appPrefsBox.put("visitorId", {
         'id': visitorId,
         'exp': DateTime.now().millisecondsSinceEpoch ~/ 1000 + 2592000
@@ -122,10 +123,9 @@ class MusicServices extends getx.GetxService {
       if (response.statusCode == 200) {
         return response;
       } else {
-        return _sendRequest(action, data, additionalParams: additionalParams);
+        return await _sendRequest(action, data, additionalParams: additionalParams);
       }
-    } on DioException catch (e) {
-      printINFO("Error $e");
+    } on DioException {
       throw NetworkError();
     }
   }
@@ -236,8 +236,11 @@ class MusicServices extends getx.GetxService {
         'watchNextTabbedResultsRenderer'
       ]);
 
-      lyricsBrowseId = getTabBrowseId(watchNextRenderer, 1);
-      relatedBrowseId = getTabBrowseId(watchNextRenderer, 2);
+      lyricsBrowseId = getWatchTabBrowseId(watchNextRenderer, 'lyrics') ??
+          getTabBrowseId(watchNextRenderer, 1);
+      relatedBrowseId = getWatchTabBrowseId(watchNextRenderer, 'related') ??
+          getTabBrowseId(watchNextRenderer, 3) ??
+          getTabBrowseId(watchNextRenderer, 2);
       if (onlyRelated) {
         return {
           'lyrics': lyricsBrowseId,
@@ -245,19 +248,26 @@ class MusicServices extends getx.GetxService {
         };
       }
 
-      results.addAll(nav(watchNextRenderer, [
+      final panelContents = nav(watchNextRenderer, [
         ...tab_content,
         'musicQueueRenderer',
         'content',
         'playlistPanelRenderer'
-      ]));
-      playlist = results['contents']
-          .map((content) => nav(content,
+      ]);
+      if (panelContents != null && panelContents is Map) {
+        results.addAll(panelContents);
+      }
+      final playlistList = (results['contents'] as List?)
+          ?.map((content) => nav(content,
               ['playlistPanelVideoRenderer', ...navigation_playlist_id]))
           .where((e) => e != null)
-          .toList()
-          .first;
-      tracks.addAll(parseWatchPlaylist(results['contents']));
+          .toList();
+      playlist = (playlistList != null && playlistList.isNotEmpty)
+          ? playlistList.first
+          : null;
+      if (results['contents'] is List) {
+        tracks.addAll(parseWatchPlaylist(results['contents']));
+      }
     }
 
     dynamic additionalParamsForNext;
@@ -599,83 +609,162 @@ class MusicServices extends getx.GetxService {
           ['sectionListRenderer', 'header', "chipCloudRenderer", "chips"]);
 
       searchResults['searchEndpoint'] = {};
-      if (searchChips != null) {
+      if (searchChips != null && searchChips is List) {
         for (dynamic chipsItemRenderer in searchChips) {
           final chip = chipsItemRenderer['chipCloudChipRenderer'];
           final chipText = nav(chip, ['text', 'runs', 0, 'text']);
-          searchResults['searchEndpoint'][chipText] =
+          final chipParam =
               nav(chip, ['navigationEndpoint', 'searchEndpoint', 'params']);
+          if (chipText != null && chipParam != null) {
+            searchResults['searchEndpoint'][chipText] = chipParam;
+          }
         }
-      }
-
-      // now Featured playlists and community playlists are not coming in top results
-      // so adding them in tab if not present
-      if ((searchResults['searchEndpoint'])
-              .containsKey("Community playlists") &&
-          !searchResults.containsKey("Community playlists")) {
-        searchResults["Community playlists"] = [];
-      }
-
-      if ((searchResults['searchEndpoint']).containsKey("Featured playlists") &&
-          !searchResults.containsKey("Featured playlists")) {
-        searchResults["Featured playlists"] = [];
       }
     }
 
-    /// End Search Chips
- 
     results = nav(results, ['sectionListRenderer', 'contents']);
 
-    if (results.length == 1 && results[0]['itemSectionRenderer'] != null) {
+    if (results == null || results is! List || results.isEmpty) {
       return searchResults;
     }
 
-    String? type;
+    if (filter == null) {
+      // Unfiltered search: parse all sections including card shelf and item sections
+      final List<MediaItem> songs = [];
+      final List<MediaItem> videos = [];
+      final List<Album> albums = [];
+      final List<Artist> artists = [];
+      final List<Playlist> communityPlaylists = [];
+      final List<Playlist> featuredPlaylists = [];
 
-    for (var res in results) {
-      String category;
-       if (res['musicShelfRenderer'] != null) {
-        dynamic itemResults = res['musicShelfRenderer']['contents'];
-        String? typeFilter = filter;
-        category = "mixed"; // Just a default value
-        final mixedItems = parseSearchResults(itemResults,
-            ['artist', 'playlist', 'song', 'video', 'station'], type, category);
-        if (filter == null) {
-          for (var item in mixedItems) {
-            final itemType = item.runtimeType == MediaItem
-                ? (item.artist.split(",")[0]) + "s"
-                : "${item.runtimeType}s";
-            if (searchResults.containsKey(itemType) &&
-                (searchResults[itemType]).length < 3) {
-              (searchResults[itemType] as List).add(item);
-            } else if (!searchResults.containsKey(itemType)) {
-              searchResults[itemType] = [item];
-            }
+      void addParsedItem(dynamic item) {
+        if (item == null) return;
+        if (item is MediaItem) {
+          final bool isVid = item.extras?['resultType'] == 'video' ||
+              item.extras?['videoType'] == 'MUSIC_VIDEO_TYPE_UGC' ||
+              item.extras?['videoType'] == 'MUSIC_VIDEO_TYPE_OMV';
+          if (isVid) {
+            if (!videos.any((e) => e.id == item.id)) videos.add(item);
+          } else {
+            if (!songs.any((e) => e.id == item.id)) songs.add(item);
           }
-        } else {
-          category = nav(res, ['musicShelfRenderer', ...title_text]);
-          searchResults[category] = parseSearchResults(
-              res['musicShelfRenderer']['contents'],
-              ['artist', 'playlist', 'song', 'video', 'station'],
-              type,
-              category);
+        } else if (item is Album) {
+          if (!albums.any((e) => e.browseId == item.browseId)) albums.add(item);
+        } else if (item is Artist) {
+          if (!artists.any((e) => e.browseId == item.browseId)) artists.add(item);
+        } else if (item is Playlist) {
+          if (!communityPlaylists.any((e) => e.playlistId == item.playlistId)) {
+            communityPlaylists.add(item);
+          }
         }
-        type = typeFilter?.substring(0, typeFilter.length - 1).toLowerCase();
-      } else {
-        continue;
       }
 
-      if (filter != null) {
+      for (var res in results) {
+        if (res == null || res is! Map) continue;
+
+        // 1. Top result card shelf
+        if (res.containsKey('musicCardShelfRenderer')) {
+          final card = res['musicCardShelfRenderer'];
+          final topItem = parseCardShelfItem(card);
+          addParsedItem(topItem);
+
+          if (card.containsKey('contents') && card['contents'] is List) {
+            final cardContents = parseSearchResults(
+                card['contents'],
+                ['artist', 'playlist', 'song', 'video', 'station'],
+                null,
+                'mixed');
+            for (var cItem in cardContents) {
+              addParsedItem(cItem);
+            }
+          }
+        }
+
+        // 2. Item section renderer (current YouTube Music search format)
+        else if (res.containsKey('itemSectionRenderer')) {
+          final itemContents = nav(res, ['itemSectionRenderer', 'contents']);
+          if (itemContents is List) {
+            final parsedItems = parseSearchResults(
+                itemContents,
+                ['artist', 'playlist', 'song', 'video', 'station'],
+                null,
+                'mixed');
+            for (var pItem in parsedItems) {
+              addParsedItem(pItem);
+            }
+          }
+        }
+
+        // 3. Music shelf renderer (category shelves like Songs, Videos, Albums)
+        else if (res.containsKey('musicShelfRenderer')) {
+          final shelf = res['musicShelfRenderer'];
+          final shelfContents = shelf['contents'];
+          String shelfTitle = nav(shelf, title_text) ?? 'mixed';
+          if (shelfContents is List) {
+            final parsedItems = parseSearchResults(
+                shelfContents,
+                ['artist', 'playlist', 'song', 'video', 'station'],
+                null,
+                shelfTitle);
+            for (var pItem in parsedItems) {
+              addParsedItem(pItem);
+            }
+          }
+        }
+      }
+
+      if (songs.isNotEmpty) searchResults['Songs'] = songs;
+      if (videos.isNotEmpty) searchResults['Videos'] = videos;
+      if (albums.isNotEmpty) searchResults['Albums'] = albums;
+      if (artists.isNotEmpty) searchResults['Artists'] = artists;
+      if (communityPlaylists.isNotEmpty) {
+        searchResults['Community playlists'] = communityPlaylists;
+      }
+      if (featuredPlaylists.isNotEmpty) {
+        searchResults['Featured playlists'] = featuredPlaylists;
+      }
+
+      // Ensure any categories found in search chips exist in searchResults
+      // so their tabs are shown in the UI even if they are loaded on-demand!
+      if (searchResults['searchEndpoint'] is Map) {
+        for (String chipKey in (searchResults['searchEndpoint'] as Map).keys) {
+          if (!searchResults.containsKey(chipKey)) {
+            searchResults[chipKey] = [];
+          }
+        }
+      }
+    } else {
+      // Filtered search (e.g. songs, videos, albums, artists, playlists)
+      String? type = filter.substring(0, filter.length - 1).toLowerCase();
+
+      for (var res in results) {
+        if (res == null || res is! Map) continue;
+        if (!res.containsKey('musicShelfRenderer')) continue;
+
+        final shelf = res['musicShelfRenderer'];
+        String category = nav(shelf, title_text) ??
+            (filter[0].toUpperCase() + filter.substring(1));
+        dynamic itemResults = shelf['contents'] ?? [];
+
+        searchResults[category] = parseSearchResults(
+            itemResults,
+            ['artist', 'playlist', 'song', 'video', 'station'],
+            type,
+            category);
+
         requestFunc(additionalParams) async =>
             (await _sendRequest("search", data,
                     additionalParams: additionalParams))
                 .data;
-        parseFunc(contents) => parseSearchResults(contents,
-            ['artist', 'playlist', 'song', 'video', 'station'], type, category);
+        parseFunc(contents) => parseSearchResults(
+            contents,
+            ['artist', 'playlist', 'song', 'video', 'station'],
+            type,
+            category);
 
         if (searchResults.containsKey(category)) {
           final x = await getContinuations(
-              res['musicShelfRenderer'],
+              shelf,
               'musicShelfContinuation',
               limit - ((searchResults[category] as List).length),
               requestFunc,

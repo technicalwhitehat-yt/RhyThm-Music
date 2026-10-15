@@ -1,7 +1,6 @@
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:widget_marquee/widget_marquee.dart';
 
 import '/ui/player/components/animated_play_button.dart';
@@ -118,7 +117,7 @@ class PlayerControlWidget extends StatelessWidget {
               IconButton(
                   onPressed: playerController.toggleShuffleMode,
                   icon: Obx(() => Icon(
-                        Ionicons.shuffle,
+                        Icons.shuffle,
                         color: playerController.isShuffleModeEnabled.value
                             ? Theme.of(context).textTheme.titleLarge!.color
                             : Theme.of(context)

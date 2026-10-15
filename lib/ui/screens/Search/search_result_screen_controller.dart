@@ -52,37 +52,50 @@ class SearchResultScreenController extends GetxController
             separatedResultContent[railItems[value - 1]].isEmpty)) {
       final tabName = railItems[value - 1];
       final itemCount = (tabName == 'Songs' || tabName == 'Videos') ? 25 : 10;
+      final filterParams = resultContent['searchEndpoint'] is Map
+          ? resultContent['searchEndpoint'][tabName]
+          : null;
       final x = await musicServices.search(queryString.value,
-           filter: tabName.replaceAll(" ", "_").toLowerCase(), limit: itemCount, filterParams: resultContent['searchEndpoint'][tabName]);
-      separatedResultContent[tabName] = x[tabName];
+          filter: tabName.replaceAll(" ", "_").toLowerCase(),
+          limit: itemCount,
+          filterParams: filterParams);
+      separatedResultContent[tabName] = x[tabName] ?? [];
       additionalParamNext[tabName] = x['params'];
       isSeparatedResultContentFetced.value = true;
       final scrollController = scrollControllers[tabName];
-      (scrollController)!.addListener(() {
-        double maxScroll = scrollController.position.maxScrollExtent;
-        double currentScroll = scrollController.position.pixels;
-        if (currentScroll >= maxScroll / 2 &&
-            additionalParamNext[tabName]['additionalParams'] !=
-                '&ctoken=null&continuation=null') {
-          if (!continuationInProgress) {
-            printINFO("Acchhsk");
-            continuationInProgress = true;
-            getContinuationContents();
+      if (scrollController != null) {
+        scrollController.addListener(() {
+          double maxScroll = scrollController.position.maxScrollExtent;
+          double currentScroll = scrollController.position.pixels;
+          if (currentScroll >= maxScroll / 2 &&
+              additionalParamNext[tabName] != null &&
+              additionalParamNext[tabName]['additionalParams'] !=
+                  '&ctoken=null&continuation=null') {
+            if (!continuationInProgress) {
+              continuationInProgress = true;
+              getContinuationContents();
+            }
           }
-        }
-      });
+        });
+      }
     }
     isSeparatedResultContentFetced.value = true;
   }
 
   Future<void> getContinuationContents() async {
     final tabName = railItems[navigationRailCurrentIndex.value - 1];
+    if (additionalParamNext[tabName] == null) {
+      continuationInProgress = false;
+      return;
+    }
 
     final x =
         await musicServices.getSearchContinuation(additionalParamNext[tabName]);
-    (separatedResultContent[tabName]).addAll(x[tabName]);
-    additionalParamNext[tabName] = x['params'];
-    separatedResultContent.refresh();
+    if (x[tabName] != null && separatedResultContent[tabName] != null) {
+      (separatedResultContent[tabName]).addAll(x[tabName]);
+      additionalParamNext[tabName] = x['params'];
+      separatedResultContent.refresh();
+    }
 
     continuationInProgress = false;
   }
@@ -165,7 +178,7 @@ class SearchResultScreenController extends GetxController
   @override
   void onClose() {
     for (String item in railItems) {
-      (scrollControllers[item])!.dispose();
+      scrollControllers[item]?.dispose();
     }
     Get.find<HomeScreenController>().whenHomeScreenOnTop();
     tabController?.dispose();

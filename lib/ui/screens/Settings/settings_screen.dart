@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rhythm_music/utils/helper.dart';
@@ -17,6 +18,7 @@ import '/ui/player/player_controller.dart';
 import '/ui/utils/theme_controller.dart';
 import 'components/custom_expansion_tile.dart';
 import 'settings_screen_controller.dart';
+import '../../../services/update_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key, this.isBottomNavActive = false});
@@ -597,6 +599,25 @@ class SettingsScreen extends StatelessWidget {
                   title: "${"backup".tr} & ${"restore".tr}",
                   icon: Icons.restore,
                   children: [
+                    if (GetPlatform.isAndroid)
+                      ListTile(
+                        contentPadding:
+                            const EdgeInsets.only(left: 5, right: 10),
+                        title: Text("appDataStorage".tr),
+                        subtitle: Obx(() => Text(
+                              settingsController.appStorageType.value ==
+                                      "external"
+                                  ? "externalStorageTitle".tr
+                                  : "internalStorageTitle".tr,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            )),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (context) =>
+                              const AppStorageSelectorDialog(),
+                        ),
+                      ),
                     ListTile(
                       contentPadding: const EdgeInsets.only(left: 5, right: 10),
                       title: Text("backupAppData".tr),
@@ -650,6 +671,240 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ]),
               CustomExpansionTile(
+                icon: Icons.person_pin_rounded,
+                title: "Creator & Developer",
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(14.0),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                            Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    'assets/icons/creator_avatar.jpg',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.person_rounded,
+                                      size: 32,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            "Technical White Hat",
+                                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        const Icon(
+                                          Icons.verified_rounded,
+                                          color: Color(0xFF1DA1F2),
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      "Lead Creator & Developer",
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: Theme.of(context).colorScheme.secondary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "Creator of RhyThm Music — An open-source, ad-free music player & streaming app designed for high-performance audio with no subscriptions and no ads.",
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  height: 1.35,
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.85),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00C5C5).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.public_rounded,
+                        color: Color(0xFF00C5C5),
+                        size: 22,
+                      ),
+                    ),
+                    title: const Text(
+                      "Official Website",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      "rhythm-music.free.nf • Web Player & Info",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                    onTap: () {
+                      launchUrl(
+                        Uri.parse('https://rhythm-music.free.nf/?i=2'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF0000).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.smart_display_rounded,
+                        color: Color(0xFFFF0000),
+                        size: 24,
+                      ),
+                    ),
+                    title: const Text(
+                      "YouTube",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      "@technicalwhitehat • Guides & Updates",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                    onTap: () {
+                      launchUrl(
+                        Uri.parse('https://www.youtube.com/@technicalwhitehat'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFF833AB4), Color(0xFFFD1D1D), Color(0xFFF77737)],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                    title: const Text(
+                      "Instagram",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      "@technicalwhitehat • Follow for Updates",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                    onTap: () {
+                      launchUrl(
+                        Uri.parse('https://www.instagram.com/technicalwhitehat'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0088CC).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: Color(0xFF0088CC),
+                        size: 20,
+                      ),
+                    ),
+                    title: const Text(
+                      "Telegram",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      "@technicalwhitehat • Community & Discussion",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                    onTap: () {
+                      launchUrl(
+                        Uri.parse('https://t.me/technicalwhitehat'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              CustomExpansionTile(
                 icon: Icons.info,
                 title: "appInfo".tr,
                 children: [
@@ -670,17 +925,37 @@ class SettingsScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  ListTile(
+                    contentPadding: const EdgeInsets.only(left: 5, right: 10),
+                    title: const Text("Check for Updates"),
+                    subtitle: Text(
+                      "Look for the latest release on GitHub",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    trailing: const Icon(Icons.sync_rounded),
+                    onTap: () {
+                      UpdateService.checkAndShowUpdateDialog(context, manualCheck: true);
+                    },
+                  ),
                   const Divider(),
-                  SizedBox(
-                    child: Column(
-                      children: [
-                        Text(
-                          "RhyThm Music",
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        Text(settingsController.currentVersion,
-                            style: Theme.of(context).textTheme.titleMedium)
-                      ],
+                  InkWell(
+                    onTap: () {
+                      UpdateService.checkAndShowUpdateDialog(context, manualCheck: true);
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            "RhyThm Music",
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          Text(settingsController.currentVersion,
+                              style: Theme.of(context).textTheme.titleMedium)
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -842,3 +1117,342 @@ Widget radioWidget(
         title: Text(label),
       ));
 }
+
+class AppStorageSelectorDialog extends StatefulWidget {
+  const AppStorageSelectorDialog({super.key});
+
+  @override
+  State<AppStorageSelectorDialog> createState() =>
+      _AppStorageSelectorDialogState();
+}
+
+class _AppStorageSelectorDialogState extends State<AppStorageSelectorDialog> {
+  late String _selectedType;
+
+  // Vibrant Purple & White palette for maximum visibility & modern look
+  static const Color primaryPurple = Color(0xFF7C3AED);
+  static const Color darkPurpleText = Color(0xFF1E1B4B);
+  static const Color textBody = Color(0xFF4B5563);
+  static const Color softPurpleBg = Color(0xFFF5F3FF);
+  static const Color purpleBorder = Color(0xFFDDD6FE);
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedType = Get.find<SettingsScreenController>().appStorageType.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settingsController = Get.find<SettingsScreenController>();
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400),
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: primaryPurple.withValues(alpha: 0.25),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryPurple.withValues(alpha: 0.12),
+                  blurRadius: 28,
+                  offset: const Offset(0, 10),
+                ),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with purple accent and close button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [primaryPurple, Color(0xFF6D28D9)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: primaryPurple.withValues(alpha: 0.3),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.storage_rounded,
+                            color: Colors.white,
+                            size: 21,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          "appDataStorage".tr,
+                          style: const TextStyle(
+                            color: darkPurpleText,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        size: 21,
+                        color: Color(0xFF6B7280),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                const Padding(
+                  padding: EdgeInsets.only(left: 4.0),
+                  child: Text(
+                    "Choose where app databases & cache are stored",
+                    style: TextStyle(
+                      color: textBody,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+
+                // Option 1: Internal Storage (Default & Recommended)
+                _buildOptionTile(
+                  isSelected: _selectedType == "internal",
+                  onTap: () => setState(() => _selectedType = "internal"),
+                  icon: Icons.shield_rounded,
+                  title: "internalStorageTitle".tr,
+                  tag: "Recommended",
+                  subtitle: "internalStorageDes".tr,
+                ),
+                const SizedBox(height: 12),
+
+                // Option 2: External Storage (Persistent)
+                _buildOptionTile(
+                  isSelected: _selectedType == "external",
+                  onTap: () => setState(() => _selectedType = "external"),
+                  icon: Icons.folder_special_rounded,
+                  title: "externalStorageTitle".tr,
+                  tag: "Persistent",
+                  subtitle: "externalStorageDes".tr,
+                ),
+                const SizedBox(height: 22),
+
+                // Purple & White Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 11),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: Color(0xFF4B5563),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryPurple,
+                        foregroundColor: Colors.white,
+                        elevation: 2,
+                        shadowColor: primaryPurple.withValues(alpha: 0.4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 22, vertical: 11),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        if (_selectedType !=
+                            settingsController.appStorageType.value) {
+                          settingsController.changeStorageLocation(
+                              _selectedType, context);
+                        }
+                      },
+                      child: Text(
+                        "apply".tr,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile({
+    required bool isSelected,
+    required VoidCallback onTap,
+    required IconData icon,
+    required String title,
+    required String tag,
+    required String subtitle,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: isSelected ? softPurpleBg : const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? primaryPurple : const Color(0xFFE5E7EB),
+            width: isSelected ? 1.8 : 1.2,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 2),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected
+                    ? const Color(0xFFEDE9FE)
+                    : const Color(0xFFF3F4F6),
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isSelected ? primaryPurple : const Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: isSelected ? primaryPurple : darkPurpleText,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 2.5),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFFEDE9FE)
+                              : const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          tag,
+                          style: TextStyle(
+                            color: isSelected
+                                ? primaryPurple
+                                : const Color(0xFF6B7280),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3.5),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      height: 1.35,
+                      color: textBody,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 19,
+                height: 19,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? primaryPurple : Colors.white,
+                  border: Border.all(
+                    color: isSelected
+                        ? primaryPurple
+                        : const Color(0xFFD1D5DB),
+                    width: 1.8,
+                  ),
+                ),
+                child: isSelected
+                    ? const Icon(
+                        Icons.check,
+                        size: 13,
+                        color: Colors.white,
+                      )
+                    : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
