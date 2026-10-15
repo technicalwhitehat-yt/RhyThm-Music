@@ -12,7 +12,7 @@
   <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/latest"><img src="https://img.shields.io/badge/Version-v2.0.0--Stable-8A2BE2.svg?style=for-the-badge&logo=android" alt="Version 2.0.0" /></a>
   <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License: MIT" /></a>
   <a href="https://rhythm-music.free.nf/?i=2"><img src="https://img.shields.io/badge/Developer-Technical%20White%20Hat-7C4DFF.svg?style=for-the-badge&logo=googlechrome" alt="Developer" /></a>
-  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Windows-brightgreen.svg?style=for-the-badge" alt="Platforms" />
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Windows%20%7C%20Linux%20%7C%20iOS-brightgreen.svg?style=for-the-badge" alt="Platforms" />
   <img src="https://img.shields.io/badge/Ads-100%25%20Free-success.svg?style=for-the-badge" alt="Ad-Free" />
 </p>
 
@@ -23,10 +23,10 @@
 - [What’s New in Version 2.0](#-whats-new)
 - [Screenshots & Visual Showcase](#-screenshots--visual-showcase)
 - [User Features](#-user-features)
+- [Download & Release Packages](#-download--release-packages)
 - [Technical Architecture & Transparency (For Developers)](#-technical-architecture--transparency-for-developers)
 - [Permissions & Privacy](#-permissions--privacy)
 - [Building from Source](#-building-from-source)
-- [Download & Release Packages](#-download--release-packages)
 - [Connect with Developer](#-connect-with-the-developer)
 - [Developer’s Note & Dedication](#-developers-note--dedication)
 - [License](#-license)
@@ -98,6 +98,26 @@ Explore the aesthetics and user interface of **Rhythm Music 2.0**:
 - 🎨 **Aesthetic Themes**: AMOLED Pitch Black, Rich Purple Velvet, and adaptive light/dark glassmorphic accents.
 
 ---
+
+## 📦 Download & Release Packages
+
+Download the official **v2.0.0** release for your specific architecture and operating system:
+
+| Platform | Package | Recommended For | Direct Download |
+|:---|:---|:---|:---:|
+| 🤖 **Android** | ⚡ **arm64-v8a APK**<br>`RhyThm-Music-v2.0.0-arm64-v8a-release.apk` | **Most modern 64-bit Android smartphones** (Snapdragon, MediaTek, Tensor, Exynos - Best performance, ~12 MB) | [📥 Download APK](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/v2.0.0/RhyThm-Music-v2.0.0-arm64-v8a-release.apk) |
+| 🤖 **Android** | 🌟 **Universal APK**<br>`RhyThm-Music-v2.0.0-universal.apk` | **All Android devices** (Works on every phone, tablet, and Android TV, ~32 MB) | [📥 Download APK](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/v2.0.0/RhyThm-Music-v2.0.0-universal.apk) |
+| 🤖 **Android** | 📱 **armeabi-v7a APK**<br>`RhyThm-Music-v2.0.0-armeabi-v7a-release.apk` | Older 32-bit Android phones (Legacy devices, ~11.7 MB) | [📥 Download APK](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/v2.0.0/RhyThm-Music-v2.0.0-armeabi-v7a-release.apk) |
+| 🤖 **Android** | 💻 **x86_64 APK**<br>`RhyThm-Music-v2.0.0-x86_64-release.apk` | Android PC Emulators (BlueStacks, LDPlayer) & Intel/AMD Chromebooks (~12 MB) | [📥 Download APK](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/v2.0.0/RhyThm-Music-v2.0.0-x86_64-release.apk) |
+| 🖥️ **Windows** | 🪟 **Windows Setup**<br>`RhyThm-Music-v2.0.0-windows-setup.exe` | Windows 10 & Windows 11 (64-bit installer, ~18 MB) | [📥 Download EXE](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/v2.0.0/RhyThm-Music-v2.0.0-windows-setup.exe) |
+| 🐧 **Linux** | 📦 **Debian / Ubuntu Package**<br>`RhyThm-Music-v2.0.0-linux.deb` | Ubuntu, Debian, Linux Mint, Pop!_OS (64-bit .deb, ~10 MB) | [📥 Download DEB](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/v2.0.0/RhyThm-Music-v2.0.0-linux.deb) |
+| 🍏 **iOS** | 📱 **iOS IPA Package**<br>`RhyThm-Music-v2.0.0.ipa` | iPhone & iPad (Sideloading via TrollStore, AltStore, Sideloadly, ~29 MB) | [📥 Download IPA](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/download/v2.0.0/RhyThm-Music-v2.0.0.ipa) |
+
+> 💡 **Tip:** If you are unsure which Android package to choose, download **`RhyThm-Music-v2.0.0-arm64-v8a-release.apk`** for modern smartphones, or **`RhyThm-Music-v2.0.0-universal.apk`** for guaranteed compatibility with any device. All release assets can also be accessed directly on the [GitHub Releases Page](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/tag/v2.0.0).
+
+
+---
+
 
 ## 🛠️ Technical Architecture & Transparency (For Developers)
 
@@ -195,20 +215,6 @@ flutter build windows --release
 
 Compiled APKs will be located in:
 `build/app/outputs/flutter-apk/`
-
----
-
-## 📦 Download & Release Packages
-
-Download the official **v2.0.0** release for your specific architecture:
-
-| Package | Recommended For | Link |
-|:---|:---|:---:|
-| 🌟 **Universal APK**<br>`RhyThm-Music-v2.0.0-universal.apk` | **All Android devices** (Best choice if you are unsure) | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
-| ⚡ **arm64-v8a APK**<br>`RhyThm-Music-v2.0.0-arm64-v8a.apk` | Modern 64-bit Android smartphones (Snapdragon, MediaTek, Tensor, Exynos) | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
-| 📱 **armeabi-v7a APK**<br>`RhyThm-Music-v2.0.0-armeabi-v7a.apk` | Older 32-bit Android phones (Legacy devices) | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
-| 💻 **x86_64 APK**<br>`RhyThm-Music-v2.0.0-x86_64.apk` | Android PC Emulators (BlueStacks, LDPlayer) & Intel/AMD Android tablets | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
-| 🖥️ **Windows Executable**<br>`rhythm_music-v2.0.exe` | Windows 10 & Windows 11 (64-bit) | [📥 Download Latest](https://github.com/technicalwhitehat-yt/RhyThm-Music/releases) |
 
 ---
 
