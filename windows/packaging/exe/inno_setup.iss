@@ -2,7 +2,7 @@
 AppId=B9F6E402-0CAE-4045-BDE6-14BD6C39C4EA
 AppVersion=2.0.0+26
 AppName=RhyThm Music
-AppPublisher=anandnet
+AppPublisher=Technical White Hat
 AppPublisherURL=https://github.com/technicalwhitehat-yt/RhyThm-Music
 AppSupportURL=https://github.com/technicalwhitehat-yt/RhyThm-Music
 AppUpdatesURL=https://github.com/technicalwhitehat-yt/RhyThm-Music

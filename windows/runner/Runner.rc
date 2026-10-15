@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "rhythm_music" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "rhythm_music" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.anandnet. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.Technicalwhitehat. All rights reserved." "\0"
             VALUE "OriginalFilename", "rhythm_music.exe" "\0"
             VALUE "ProductName", "rhythm_music" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
