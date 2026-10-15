@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import '/services/permission_service.dart';
 
 class AppStorageService {
   static const String externalRootFolder = "/storage/emulated/0/RhyThm Music";
@@ -35,9 +36,18 @@ class AppStorageService {
     if (!GetPlatform.isAndroid) {
       return "internal";
     }
+
+    // Storage cannot be external if storage permission is not granted!
+    final hasPerm = await PermissionService.isStoragePermissionGranted();
+    if (!hasPerm) {
+      _cachedStorageType = "internal";
+      return "internal";
+    }
+
     if (_cachedStorageType != null) {
       return _cachedStorageType!;
     }
+
     try {
       final supportDir = (await getApplicationSupportDirectory()).path;
       final configFile = File("$supportDir/$configFileName");
@@ -66,18 +76,8 @@ class AppStorageService {
       debugPrint("Error reading app storage config from docDir: $e");
     }
 
-    // Fallback: check config in external folder if previously stored there
-    try {
-      final extConfigFile = File("$externalRootFolder/$configFileName");
-      if (await extConfigFile.exists()) {
-        final val = (await extConfigFile.readAsString()).trim();
-        if (val == "internal" || val == "external") {
-          _cachedStorageType = val;
-          return val;
-        }
-      }
-    } catch (_) {}
-
+    // Default for fresh install is always internal
+    _cachedStorageType = "internal";
     return "internal";
   }
 
