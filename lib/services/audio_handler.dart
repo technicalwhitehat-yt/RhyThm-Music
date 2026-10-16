@@ -334,19 +334,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
     }
     await _player.play();
   }
-    // Workaround for network error pause in case of PlayingUsingLockCachingSource
-    // if (isPlayingUsingLockCachingSource && networkErrorPause) {
-    //   await _player.play();
-    //   Future.delayed(const Duration(seconds: 2)).then((value) {
-    //     if (_player.playing) {
-    //       networkErrorPause = false;
-    //     }
-    //   });
-    //   await _player.play();
-    //   return;
-    // }
-    await _player.play();
-  }
+
 
   @override
   Future<void> pause() => _player.pause();
