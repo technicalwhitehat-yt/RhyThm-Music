@@ -2,7 +2,7 @@
   <img src="img/rhythm_logo.png" alt="Rhythm Music Logo" width="130" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(124, 77, 255, 0.45);" />
 </p>
 
-<h1 align="center">🎵 Rhythm Music v2.0</h1>
+<h1 align="center">🎵 Rhythm Music v2.1</h1>
 
 <p align="center">
   <b>A modern, open-source, ad-free, high-fidelity music streaming and offline player crafted with passion.</b>
@@ -20,7 +20,7 @@
 
 ## 📖 Table of Contents
 - [About Rhythm Music](#-about-rhythm-music)
-- [What’s New in Version 2.0](#-whats-new)
+- [What’s New in Version 2.1](#-whats-new)
 - [Screenshots & Visual Showcase](#-screenshots--visual-showcase)
 - [User Features](#-user-features)
 - [Download & Release Packages](#-download--release-packages)
@@ -52,6 +52,8 @@ Whether streaming trending global hits or playing locally downloaded audio with 
 - 🔍 **Direct Search Discovery Shortcut** – Dedicated search shortcut button added to "You Might Also Like" and "Quick Picks" for instantaneous browsing.
 - 👤 **Creator & Developer Hub** – Direct in-app integration of developer profile, official logo, and one-tap access to the Technical White Hat Portfolio.
 - 🛠️ **Under-The-Hood Optimizations** – Upgraded Hive database handling, resolved background playback concurrency, refined media housekeeping, and improved battery efficiency.
+- 🎯 **Smart Home Feed**: Set "Based on Last Interaction" as the default discover mode, offering personalized song recommendations based on your listening habits.
+
 
 ---
 
@@ -254,7 +256,7 @@ Stay updated with new releases, tutorials, and development logs:
 Distributed under the **MIT License**.  
 Free to use, customize, and distribute with love and respect ❤️.
 
-See the [LICENSE](file:///a:/RhyThm-Music-2.0/LICENSE) file for complete details.
+See the [LICENSE](/RhyThm-Music/LICENSE) file for complete details.
 
 ---
 
