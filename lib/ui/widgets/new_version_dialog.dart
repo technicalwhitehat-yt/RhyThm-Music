@@ -135,10 +135,26 @@ class _NewVersionDialogState extends State<NewVersionDialog>
 
       await Future.delayed(const Duration(milliseconds: 300));
 
-      final success = await UpdateService.installApk(filePath);
-
-      if (!success && mounted) {
-        // Fallback: open via external application
+      if (GetPlatform.isAndroid) {
+        final success = await UpdateService.installApk(filePath);
+        if (!success && mounted) {
+          launchUrl(
+            Uri.parse(widget.releaseInfo.downloadUrl),
+            mode: LaunchMode.externalApplication,
+          );
+        }
+      } else if (GetPlatform.isWindows) {
+        try {
+          await Process.start(filePath, []);
+        } catch (_) {
+          if (mounted) {
+            launchUrl(
+              Uri.parse(widget.releaseInfo.downloadUrl),
+              mode: LaunchMode.externalApplication,
+            );
+          }
+        }
+      } else {
         launchUrl(
           Uri.parse(widget.releaseInfo.downloadUrl),
           mode: LaunchMode.externalApplication,

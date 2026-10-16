@@ -121,10 +121,15 @@ void _setAppInitPrefs() {
       "skipSilenceEnabled": false,
       'streamingQuality': 1,
       'themePrimaryColor': 4278199603,
-      'discoverContentType': "QP",
+      'discoverContentType': "BOLI",
       'newVersionVisibility': updateCheckFlag,
       "cacheHomeScreenData": true
     });
+  } else {
+    // For users updating to v2.1.0, update default discover content if still on old default QP
+    if (appPrefs.get('discoverContentType') == "QP") {
+      appPrefs.put('discoverContentType', "BOLI");
+    }
   }
 }
 

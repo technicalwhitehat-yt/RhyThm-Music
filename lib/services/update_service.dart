@@ -43,7 +43,7 @@ class UpdateService {
       final currentVersion = curVer ??
           (Get.isRegistered<SettingsScreenController>()
               ? Get.find<SettingsScreenController>().currentVersion
-              : "2.0.0");
+              : "2.1.0");
 
       final dio = Dio(
         BaseOptions(
@@ -100,34 +100,67 @@ class UpdateService {
         }
       }
 
-      // Smart APK Selection:
-      // Priority 1: arm64-v8a or universal APK
-      // Priority 2: first available APK
+      // Smart Platform-Aware Asset Selection:
       String selectedDownloadUrl = "";
-      String selectedFileName = "rhythm_music_update.apk";
+      String selectedFileName = "rhythm_music_update";
       int selectedFileSize = 0;
 
-      final apkAssets = assets.where((a) {
-        final name = (a["name"] ?? "").toString().toLowerCase();
-        return name.endsWith(".apk");
-      }).toList();
-
-      if (apkAssets.isNotEmpty) {
-        // Priority 1: arm64-v8a or universal
-        dynamic chosen = apkAssets.firstWhere((a) {
+      if (GetPlatform.isWindows) {
+        final winAssets = assets.where((a) {
           final name = (a["name"] ?? "").toString().toLowerCase();
-          return name.contains("arm64") ||
-              name.contains("arm64-v8a") ||
-              name.contains("universal");
-        }, orElse: () => null);
-
-        // Priority 2: first available apk
-        chosen ??= apkAssets.first;
-
-        selectedDownloadUrl = chosen["browser_download_url"]?.toString() ?? "";
-        selectedFileName = chosen["name"]?.toString() ?? "rhythm_music_update.apk";
-        selectedFileSize = chosen["size"] as int? ?? 0;
+          return name.endsWith(".exe") || name.endsWith(".zip");
+        }).toList();
+        if (winAssets.isNotEmpty) {
+          final chosen = winAssets.first;
+          selectedDownloadUrl = chosen["browser_download_url"]?.toString() ?? "";
+          selectedFileName = chosen["name"]?.toString() ?? "RhyThm-Music-windows-setup.exe";
+          selectedFileSize = chosen["size"] as int? ?? 0;
+        }
+      } else if (GetPlatform.isLinux) {
+        final linuxAssets = assets.where((a) {
+          final name = (a["name"] ?? "").toString().toLowerCase();
+          return name.endsWith(".deb") || name.endsWith(".appimage") || name.endsWith(".tar.gz");
+        }).toList();
+        if (linuxAssets.isNotEmpty) {
+          final chosen = linuxAssets.first;
+          selectedDownloadUrl = chosen["browser_download_url"]?.toString() ?? "";
+          selectedFileName = chosen["name"]?.toString() ?? "RhyThm-Music-linux.deb";
+          selectedFileSize = chosen["size"] as int? ?? 0;
+        }
+      } else if (GetPlatform.isIOS) {
+        final iosAssets = assets.where((a) {
+          final name = (a["name"] ?? "").toString().toLowerCase();
+          return name.endsWith(".ipa");
+        }).toList();
+        if (iosAssets.isNotEmpty) {
+          final chosen = iosAssets.first;
+          selectedDownloadUrl = chosen["browser_download_url"]?.toString() ?? "";
+          selectedFileName = chosen["name"]?.toString() ?? "RhyThm-Music.ipa";
+          selectedFileSize = chosen["size"] as int? ?? 0;
+        }
       } else {
+        // Android APK Selection
+        final apkAssets = assets.where((a) {
+          final name = (a["name"] ?? "").toString().toLowerCase();
+          return name.endsWith(".apk");
+        }).toList();
+
+        if (apkAssets.isNotEmpty) {
+          dynamic chosen = apkAssets.firstWhere((a) {
+            final name = (a["name"] ?? "").toString().toLowerCase();
+            return name.contains("arm64") ||
+                name.contains("arm64-v8a") ||
+                name.contains("universal");
+          }, orElse: () => null);
+
+          chosen ??= apkAssets.first;
+          selectedDownloadUrl = chosen["browser_download_url"]?.toString() ?? "";
+          selectedFileName = chosen["name"]?.toString() ?? "rhythm_music_update.apk";
+          selectedFileSize = chosen["size"] as int? ?? 0;
+        }
+      }
+
+      if (selectedDownloadUrl.isEmpty) {
         selectedDownloadUrl = data["html_url"]?.toString() ?? "";
       }
 

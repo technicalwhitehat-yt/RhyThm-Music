@@ -73,7 +73,17 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
   MyAudioHandler() {
     if (GetPlatform.isWindows || GetPlatform.isLinux) {
       JustAudioMediaKit.title = 'RhyThm music';
-      JustAudioMediaKit.protocolWhitelist = const ['http', 'https', 'file'];
+      JustAudioMediaKit.protocolWhitelist = const [
+        'udp',
+        'rtp',
+        'tcp',
+        'tls',
+        'data',
+        'file',
+        'http',
+        'https',
+        'crypto',
+      ];
     }
     _mediaLibrary = MediaLibrary();
     _player = AudioPlayer(
@@ -84,7 +94,9 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
       bufferForPlaybackDuration: Duration(milliseconds: 100),
       bufferForPlaybackAfterRebufferDuration: Duration(milliseconds: 500),
     )));
-    StreamProxy.ensureStarted();
+    if (!GetPlatform.isDesktop) {
+      StreamProxy.ensureStarted();
+    }
     _createCacheDir();
     _addEmptyList();
     _notifyAudioHandlerAboutPlaybackEvents();
@@ -186,7 +198,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
             ? 700
             : 0;
     _player.positionStream.listen((value) async {
-      if (_player.duration != null && _player.duration?.inSeconds != 0) {
+      if (_player.duration != null && _player.duration!.inSeconds > 2) {
         if (value.inMilliseconds >=
             (_player.duration!.inMilliseconds - playerDurationOffset)) {
           await _triggerNext();
@@ -267,7 +279,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
       final codec = (mediaItem.extras?['codec'] as String?) ?? 'mp4a';
       final mimeType = codec.contains('opus') ? 'audio/webm' : 'audio/mp4';
 
-      if (StreamProxy.isRunning) {
+      if (StreamProxy.isRunning && !GetPlatform.isDesktop) {
         final proxyUrl = StreamProxy.getProxyUrl(
           songId: mediaItem.id,
           originalUrl: url,
@@ -316,13 +328,12 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
 
   @override
   Future<void> play() async {
-    if (currentSongUrl == null ||
-        (GetPlatform.isDesktop &&
-            (_player.duration == null ||
-                _player.duration?.inMilliseconds == 0))) {
+    if (currentSongUrl == null) {
       await customAction("playByIndex", {'index': currentIndex});
       return;
     }
+    await _player.play();
+  }
     // Workaround for network error pause in case of PlayingUsingLockCachingSource
     // if (isPlayingUsingLockCachingSource && networkErrorPause) {
     //   await _player.play();

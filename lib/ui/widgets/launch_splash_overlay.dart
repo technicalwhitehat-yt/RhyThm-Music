@@ -50,7 +50,7 @@ class _LaunchSplashOverlayState extends State<LaunchSplashOverlay>
       return widget.child;
     }
 
-    String currentVersion = "v2.0.0";
+    String currentVersion = "v2.1.0";
     if (Get.isRegistered<SettingsScreenController>()) {
       final ver = Get.find<SettingsScreenController>().currentVersion;
       if (ver.isNotEmpty) {
