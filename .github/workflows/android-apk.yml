@@ -44,5 +44,5 @@ jobs:
       - name: Upload apk artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RhyThm music V1.1 apk
+          name: RhyThm music V2.0 apk
           path: ./RhyThm-Music/build/app/outputs/flutter-apk/*apk
