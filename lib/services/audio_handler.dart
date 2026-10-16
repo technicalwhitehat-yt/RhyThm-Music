@@ -506,7 +506,17 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         mediaItem.add(currentSong);
         playbackState
             .add(playbackState.value.copyWith(queueIndex: currentIndex));
-        await _player.setAudioSource(_createAudioSource(currentSong));
+        if (GetPlatform.isDesktop) {
+          if (_player.audioSource != _playList) {
+            await _player.setAudioSource(_playList);
+          }
+          if (_playList.children.isNotEmpty) {
+            await _playList.clear();
+          }
+          await _playList.add(_createAudioSource(currentSong));
+        } else {
+          await _player.setAudioSource(_createAudioSource(currentSong));
+        }
 
         if (_player.duration != null) {
           currentSong = currentSong.copyWith(duration: _player.duration);
@@ -602,7 +612,17 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         currentSongUrl = audioObj.url;
         mediaItem.add(currMed);
 
-        await _player.setAudioSource(_createAudioSource(currMed));
+        if (GetPlatform.isDesktop) {
+          if (_player.audioSource != _playList) {
+            await _player.setAudioSource(_playList);
+          }
+          if (_playList.children.isNotEmpty) {
+            await _playList.clear();
+          }
+          await _playList.add(_createAudioSource(currMed));
+        } else {
+          await _player.setAudioSource(_createAudioSource(currMed));
+        }
 
         if (_player.duration != null) {
           currMed = currMed.copyWith(duration: _player.duration);
