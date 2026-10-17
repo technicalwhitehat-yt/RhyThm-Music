@@ -10,22 +10,22 @@ class StreamProvider {
       {required this.playable, this.audioFormats, this.statusMSG = ""});
 
   static Future<StreamProvider> fetch(String videoId) async {
-    // LAYER 1: YOUTUBE EXPLODE WITH ANDROID_VR & IOS CLIENTS (requireWatchPage: false)
-    // Strictly audio-only streams (itag 140, 251, 139, 250, 249) without video container overhead or 403 blocks
+    // LAYER 1: YOUTUBE EXPLODE WITH ANDROID CLIENT (requireWatchPage: false)
+    // Provides Muxed Tag 18 with ratebypass=yes for instant seek/skip without 403 or rate limiting
     final yt = YoutubeExplode();
     try {
       StreamManifest? res;
       try {
         res = await yt.videos.streamsClient.getManifest(
           videoId,
-          ytClients: [YoutubeApiClient.androidVr],
+          ytClients: [YoutubeApiClient.android],
           requireWatchPage: false,
         );
       } catch (_) {
         try {
           res = await yt.videos.streamsClient.getManifest(
             videoId,
-            ytClients: [YoutubeApiClient.ios],
+            ytClients: [YoutubeApiClient.androidVr],
             requireWatchPage: false,
           );
         } catch (_) {}
@@ -34,7 +34,24 @@ class StreamProvider {
       if (res != null) {
         final List<Audio> allAudio = [];
 
-        // Strictly Audio-only formats (itag 140 AAC, 251 Opus, 139, 250, 249)
+        // 1. Tag 18 (muxed 360p MP4 with ratebypass=yes)
+        // Provides 128 kbps AAC audio without YouTube's 1MB SABR throttling or seek 403s
+        final tag18 = res.muxed.cast<MuxedStreamInfo?>().firstWhere(
+            (e) => e?.tag == 18,
+            orElse: () => null);
+        if (tag18 != null) {
+          allAudio.add(Audio(
+            itag: tag18.tag,
+            audioCodec: Codec.mp4a,
+            bitrate: 128000,
+            duration: 0,
+            loudnessDb: 0.0,
+            url: tag18.url.toString(),
+            size: tag18.size.totalBytes,
+          ));
+        }
+
+        // 2. Audio-only formats (itag 140, 251, etc.)
         for (final e in res.audioOnly) {
           allAudio.add(Audio(
             itag: e.tag,
@@ -193,10 +210,13 @@ class StreamProvider {
     final streamingData = data['streamingData'];
     if (streamingData == null) return allAudio;
 
+    final formats = streamingData['formats'] as List? ?? [];
     final adaptiveFormats = streamingData['adaptiveFormats'] as List? ?? [];
+    final combined = [...formats, ...adaptiveFormats];
+
     final playerLoudness = (data['playerConfig']?['audioConfig']?['loudnessDb'] as num?)?.toDouble() ?? 0.0;
 
-    for (final f in adaptiveFormats) {
+    for (final f in combined) {
       if (f is! Map) continue;
       final url = f['url'] as String?;
       if (url == null || url.isEmpty) continue;
@@ -204,12 +224,13 @@ class StreamProvider {
       final mimeType = f['mimeType'] as String? ?? '';
       final itag = f['itag'] as int? ?? 0;
 
-      // Strictly audio-only streams (e.g. audio/mp4 itag 140/139, audio/webm itag 251/250/249)
-      if (mimeType.startsWith('audio/')) {
-        final codec = mimeType.contains('mp')
+      if (mimeType.startsWith('audio/mp4') ||
+          mimeType.startsWith('audio/webm') ||
+          itag == 18) {
+        final codec = mimeType.contains('mp') || itag == 18
             ? Codec.mp4a
             : Codec.opus;
-        final bitrate = (f['bitrate'] as num?)?.toInt() ?? 128000;
+        final bitrate = (f['bitrate'] as num?)?.toInt() ?? (itag == 18 ? 128000 : 0);
         final duration = int.tryParse(f['approxDurationMs']?.toString() ?? '') ?? 0;
         final size = int.tryParse(f['contentLength']?.toString() ?? '') ?? 0;
         final loudnessDb = (f['loudnessDb'] as num?)?.toDouble() ?? playerLoudness;
@@ -288,6 +309,12 @@ class StreamProvider {
 
   Audio? get highestQualityAudio {
     if (audioFormats == null || audioFormats!.isEmpty) return null;
+    // Prefer itag 18 (unthrottled ratebypass mp4a) for 100% seek & playback reliability
+    final itag18 = audioFormats!.cast<Audio?>().firstWhere(
+        (item) => item!.itag == 18,
+        orElse: () => null);
+    if (itag18 != null) return itag18;
+
     final itag140 = audioFormats!.cast<Audio?>().firstWhere(
         (item) => item!.itag == 140,
         orElse: () => null);
@@ -303,6 +330,12 @@ class StreamProvider {
 
   Audio? get highestBitrateMp4aAudio {
     if (audioFormats == null || audioFormats!.isEmpty) return null;
+    // Prefer itag 18: unthrottled with ratebypass=yes, immune to YouTube 403 Forbidden
+    final itag18 = audioFormats!.cast<Audio?>().firstWhere(
+        (item) => item?.itag == 18,
+        orElse: () => null);
+    if (itag18 != null) return itag18;
+
     return audioFormats!.cast<Audio?>().lastWhere(
         (item) => item!.itag == 140 || item.itag == 139,
         orElse: () => audioFormats!.first);

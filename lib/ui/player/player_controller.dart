@@ -14,7 +14,6 @@ import '/services/synced_lyrics_service.dart';
 import '/ui/screens/Settings/settings_screen_controller.dart';
 import '../../services/windows_audio_service.dart';
 import '../../utils/helper.dart';
-import '../../utils/app_logger.dart';
 import '/models/media_Item_builder.dart';
 import '../screens/Home/home_screen_controller.dart';
 import '../widgets/sliding_up_panel.dart';
@@ -791,16 +790,9 @@ class PlayerController extends GetxController
   /// Called from audio handler in case audio is not playable
   /// or returned streamInfo null due to network error
   void notifyPlayError(String message) {
-    AppLogger.error("notifyPlayError: $message", tag: "PlayerController");
-    try {
-      if (Get.context != null) {
-        ScaffoldMessenger.of(Get.context!).showSnackBar(snackbar(
-            Get.context!, message == "networkError" ? message.tr : message,
-            size: SanckBarSize.MEDIUM));
-      }
-    } catch (e) {
-      AppLogger.error("Error displaying error snackbar: $e", tag: "PlayerController");
-    }
+    ScaffoldMessenger.of(Get.context!).showSnackBar(snackbar(
+        Get.context!, message == "networkError" ? message.tr : message,
+        size: SanckBarSize.MEDIUM));
   }
 
   @override

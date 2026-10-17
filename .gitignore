@@ -75,3 +75,9 @@ android/app/.cxx/Debug/*
 
 /android/app/.cxx
 
+# Local website project (do not commit to app repo)
+Website/
+
+# Local signing keys / secrets
+android/app/keystore_base64.txt
+

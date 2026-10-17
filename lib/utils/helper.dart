@@ -5,22 +5,17 @@ import 'package:get/get.dart';
 import '/ui/navigator.dart';
 import '/ui/widgets/sort_widget.dart';
 
-import '/utils/app_logger.dart';
-
 void printERROR(dynamic text, {String tag = "RhyThm Music"}) {
-  AppLogger.error(text, tag: tag);
   if (kReleaseMode) return;
   debugPrint("\x1B[31m[$tag]: $text\x1B[0m");
 }
 
 void printWarning(dynamic text, {String tag = 'RhyThm Music'}) {
-  AppLogger.warn(text, tag: tag);
   if (kReleaseMode) return;
   debugPrint("\x1B[33m[$tag]: $text\x1B[34m");
 }
 
 void printINFO(dynamic text, {String tag = 'RhyThm Music'}) {
-  AppLogger.info(text, tag: tag);
   if (kReleaseMode) return;
   debugPrint("\x1B[32m[$tag]: $text\x1B[34m");
 }

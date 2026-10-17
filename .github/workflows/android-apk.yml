@@ -35,22 +35,6 @@ jobs:
         working-directory: ./RhyThm-Music/lib/utils
         run: echo "const updateCheckFlag = true;" > update_check_flag_file.dart
         
-      - name: Configure Keystore from Secrets
-        working-directory: ./RhyThm-Music
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          if ($env:KEYSTORE_BASE64) {
-              [IO.File]::WriteAllBytes("android/app/rhythm_release.keystore", [Convert]::FromBase64String($env:KEYSTORE_BASE64))
-              Set-Content -Path "android/key.properties" -Value "storePassword=$env:KEYSTORE_PASSWORD", "keyPassword=$env:KEY_PASSWORD", "keyAlias=$env:KEY_ALIAS", "storeFile=rhythm_release.keystore"
-              Write-Host "Keystore configured successfully."
-          } else {
-              Write-Host "No KEYSTORE_BASE64 found, skipping keystore setup."
-          }
-
       - name: Build android apk
         working-directory: ./RhyThm-Music
         run: |

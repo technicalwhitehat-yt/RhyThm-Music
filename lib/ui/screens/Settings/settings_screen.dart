@@ -19,7 +19,6 @@ import '/ui/utils/theme_controller.dart';
 import 'components/custom_expansion_tile.dart';
 import 'settings_screen_controller.dart';
 import '../../../services/update_service.dart';
-import '../../../utils/app_logger.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key, this.isBottomNavActive = false});
@@ -906,62 +905,6 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
               CustomExpansionTile(
-                icon: Icons.bug_report,
-                title: "troubleshooting".tr.isNotEmpty && "troubleshooting".tr != "troubleshooting"
-                    ? "troubleshooting".tr
-                    : "Troubleshooting & Logs",
-                children: [
-                  ListTile(
-                    contentPadding: const EdgeInsets.only(left: 5, right: 10),
-                    title: const Text("Open Live Log File"),
-                    subtitle: Text(
-                      AppLogger.getLogFilePath(),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    trailing: const Icon(Icons.open_in_new),
-                    onTap: () async {
-                      await AppLogger.openLogFile();
-                    },
-                  ),
-                  ListTile(
-                    contentPadding: const EdgeInsets.only(left: 5, right: 10),
-                    title: const Text("Copy Recent Logs"),
-                    subtitle: const Text("Copy last 100 log lines to clipboard"),
-                    trailing: const Icon(Icons.copy),
-                    onTap: () async {
-                      await AppLogger.copyLogsToClipboard();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          snackbar(
-                            context,
-                            "Diagnostic logs copied to clipboard.",
-                            size: SanckBarSize.MEDIUM,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                  ListTile(
-                    contentPadding: const EdgeInsets.only(left: 5, right: 10),
-                    title: const Text("Clear Log File"),
-                    subtitle: const Text("Reset log file for a fresh debugging session"),
-                    trailing: const Icon(Icons.delete_outline),
-                    onTap: () async {
-                      await AppLogger.clearLog();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          snackbar(
-                            context,
-                            "Log file has been reset.",
-                            size: SanckBarSize.MEDIUM,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-              CustomExpansionTile(
                 icon: Icons.info,
                 title: "appInfo".tr,
                 children: [
@@ -1191,6 +1134,7 @@ class _AppStorageSelectorDialogState extends State<AppStorageSelectorDialog> {
   static const Color darkPurpleText = Color(0xFF1E1B4B);
   static const Color textBody = Color(0xFF4B5563);
   static const Color softPurpleBg = Color(0xFFF5F3FF);
+  static const Color purpleBorder = Color(0xFFDDD6FE);
 
   @override
   void initState() {
