@@ -123,6 +123,11 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           "PlayerState: playing=${state.playing}, processingState=${state.processingState}",
           tag: "PlayerState");
     });
+    _player.positionStream.listen((pos) {
+      if (pos.inSeconds > 0 && pos.inSeconds % 10 == 0) {
+        AppLogger.info("Playback Position: ${pos.inSeconds}s / ${_player.duration?.inSeconds ?? 0}s", tag: "Playback");
+      }
+    });
   }
 
   Future<void> _createCacheDir() async {
@@ -133,12 +138,10 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
   }
 
   void _addEmptyList() {
-    if (!GetPlatform.isDesktop) {
-      try {
-        _player.setAudioSource(_playList);
-      } catch (r) {
-        printERROR(r.toString());
-      }
+    try {
+      _player.setAudioSource(_playList);
+    } catch (r) {
+      printERROR(r.toString());
     }
   }
 
@@ -292,7 +295,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
       final codec = (mediaItem.extras?['codec'] as String?) ?? 'mp4a';
       final mimeType = codec.contains('opus') ? 'audio/webm' : 'audio/mp4';
 
-      if (StreamProxy.isRunning) {
+      if (!GetPlatform.isDesktop && StreamProxy.isRunning) {
         final proxyUrl = StreamProxy.getProxyUrl(
           songId: mediaItem.id,
           originalUrl: url,
@@ -305,12 +308,14 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           tag: mediaItem,
         );
       }
+      final String ua = url.contains('c=IOS')
+          ? 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)'
+          : 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip';
+      AppLogger.info("Direct audio source for Desktop libmpv (ua: $ua)", tag: "AudioHandler");
       return AudioSource.uri(
         Uri.parse(url),
         headers: {
-          'User-Agent': url.contains('c=ANDROID_VR')
-              ? 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip'
-              : 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)',
+          'User-Agent': ua,
         },
         tag: mediaItem,
       );
@@ -538,10 +543,20 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
 
         try {
           AppLogger.info("playByIndex: Setting audio source for [${currentSong.title}] (${currentSong.id})", tag: "AudioHandler");
-          await _player.setAudioSource(
-            _createAudioSource(currentSong),
-            preload: true,
-          );
+          if (GetPlatform.isDesktop) {
+            if (_player.audioSource != _playList) {
+              await _player.setAudioSource(_playList);
+            }
+            if (_playList.children.isNotEmpty) {
+              await _playList.clear();
+            }
+            await _playList.add(_createAudioSource(currentSong));
+          } else {
+            await _player.setAudioSource(
+              _createAudioSource(currentSong),
+              preload: true,
+            );
+          }
 
           if (_player.duration != null) {
             currentSong = currentSong.copyWith(duration: _player.duration);
@@ -646,10 +661,20 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
 
         try {
           AppLogger.info("setSourceNPlay: Setting audio source for [${currMed.title}] (${currMed.id})", tag: "AudioHandler");
-          await _player.setAudioSource(
-            _createAudioSource(currMed),
-            preload: true,
-          );
+          if (GetPlatform.isDesktop) {
+            if (_player.audioSource != _playList) {
+              await _player.setAudioSource(_playList);
+            }
+            if (_playList.children.isNotEmpty) {
+              await _playList.clear();
+            }
+            await _playList.add(_createAudioSource(currMed));
+          } else {
+            await _player.setAudioSource(
+              _createAudioSource(currMed),
+              preload: true,
+            );
+          }
 
           if (_player.duration != null) {
             currMed = currMed.copyWith(duration: _player.duration);

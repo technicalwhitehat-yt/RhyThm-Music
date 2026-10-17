@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import '../utils/app_logger.dart';
 
 class StreamMetadata {
   final String originalUrl;
@@ -65,6 +66,7 @@ class StreamProxy {
     }
 
     final songId = uri.queryParameters['id'];
+    AppLogger.info("StreamProxy: ${request.method} request for $songId (Range: ${request.headers.value(HttpHeaders.rangeHeader)})", tag: "StreamProxy");
     StreamMetadata? metadata =
         songId != null ? _activeStreams[songId] : null;
 
@@ -256,6 +258,7 @@ class StreamProxy {
 
             currentPos = chunkEnd + 1;
           } else {
+            AppLogger.error("StreamProxy: YouTube returned status ${ytRes.statusCode} for $songId (chunk: bytes=$currentPos-$chunkEnd)", tag: "StreamProxy");
             await ytRes.drain();
             try {
               client.close(force: true);
