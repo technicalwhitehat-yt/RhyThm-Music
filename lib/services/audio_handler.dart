@@ -64,6 +64,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
   // var networkErrorPause = false;
   bool isSongLoading = true;
   int _playRequestSeq = 0;
+  int _lastLoggedPositionSec = -1;
 
   // list of shuffled queue songs ids
   List<String> shuffledQueue = [];
@@ -124,7 +125,10 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           tag: "PlayerState");
     });
     _player.positionStream.listen((pos) {
-      if (pos.inSeconds > 0 && pos.inSeconds % 10 == 0) {
+      if (pos.inSeconds > 0 &&
+          pos.inSeconds % 10 == 0 &&
+          pos.inSeconds != _lastLoggedPositionSec) {
+        _lastLoggedPositionSec = pos.inSeconds;
         AppLogger.info("Playback Position: ${pos.inSeconds}s / ${_player.duration?.inSeconds ?? 0}s", tag: "Playback");
       }
     });
@@ -295,7 +299,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
       final codec = (mediaItem.extras?['codec'] as String?) ?? 'mp4a';
       final mimeType = codec.contains('opus') ? 'audio/webm' : 'audio/mp4';
 
-      if (!GetPlatform.isDesktop && StreamProxy.isRunning) {
+      if (StreamProxy.isRunning) {
         final proxyUrl = StreamProxy.getProxyUrl(
           songId: mediaItem.id,
           originalUrl: url,
@@ -308,10 +312,8 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           tag: mediaItem,
         );
       }
-      final String ua = url.contains('c=IOS')
-          ? 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)'
-          : 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip';
-      AppLogger.info("Direct audio source for Desktop libmpv (ua: $ua)", tag: "AudioHandler");
+      final String ua = StreamProxy.resolveUserAgent(url);
+      AppLogger.info("Direct audio source fallback (ua: $ua)", tag: "AudioHandler");
       return AudioSource.uri(
         Uri.parse(url),
         headers: {
@@ -543,6 +545,12 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
 
         try {
           AppLogger.info("playByIndex: Setting audio source for [${currentSong.title}] (${currentSong.id})", tag: "AudioHandler");
+          await StreamProxy.ensureStarted();
+          _lastLoggedPositionSec = -1;
+          try {
+            await _player.seek(Duration.zero);
+          } catch (_) {}
+
           if (GetPlatform.isDesktop) {
             if (_player.audioSource != _playList) {
               await _player.setAudioSource(_playList);
@@ -582,6 +590,21 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
             AppLogger.info("playByIndex: Calling _player.play() for [${currentSong.title}]", tag: "AudioHandler");
             await _player.play();
             AppLogger.info("playByIndex: Play call completed. Playing: ${_player.playing}, State: ${_player.processingState}", tag: "AudioHandler");
+
+            if (GetPlatform.isDesktop) {
+              Future.delayed(const Duration(milliseconds: 150), () {
+                if (_player.processingState == ProcessingState.ready && !_player.playing) {
+                  AppLogger.warn("Watchdog 150ms: Re-triggering _player.play()", tag: "AudioHandler");
+                  _player.play();
+                }
+              });
+              Future.delayed(const Duration(milliseconds: 400), () {
+                if (_player.processingState == ProcessingState.ready && !_player.playing) {
+                  AppLogger.warn("Watchdog 400ms: Re-triggering _player.play()", tag: "AudioHandler");
+                  _player.play();
+                }
+              });
+            }
           }
         } catch (e, st) {
           AppLogger.error("playByIndex error: $e", stackTrace: st, tag: "AudioHandler");
@@ -661,6 +684,12 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
 
         try {
           AppLogger.info("setSourceNPlay: Setting audio source for [${currMed.title}] (${currMed.id})", tag: "AudioHandler");
+          await StreamProxy.ensureStarted();
+          _lastLoggedPositionSec = -1;
+          try {
+            await _player.seek(Duration.zero);
+          } catch (_) {}
+
           if (GetPlatform.isDesktop) {
             if (_player.audioSource != _playList) {
               await _player.setAudioSource(_playList);
@@ -694,6 +723,21 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           AppLogger.info("setSourceNPlay: Calling _player.play() for [${currMed.title}]", tag: "AudioHandler");
           await _player.play();
           AppLogger.info("setSourceNPlay: Play finished. Playing: ${_player.playing}, State: ${_player.processingState}", tag: "AudioHandler");
+
+          if (GetPlatform.isDesktop) {
+            Future.delayed(const Duration(milliseconds: 150), () {
+              if (_player.processingState == ProcessingState.ready && !_player.playing) {
+                AppLogger.warn("Watchdog 150ms: Re-triggering _player.play()", tag: "AudioHandler");
+                _player.play();
+              }
+            });
+            Future.delayed(const Duration(milliseconds: 400), () {
+              if (_player.processingState == ProcessingState.ready && !_player.playing) {
+                AppLogger.warn("Watchdog 400ms: Re-triggering _player.play()", tag: "AudioHandler");
+                _player.play();
+              }
+            });
+          }
         } catch (e, st) {
           AppLogger.error("setSourceNPlay error: $e", stackTrace: st, tag: "AudioHandler");
           isSongLoading = false;

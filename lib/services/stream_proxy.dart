@@ -43,23 +43,50 @@ class StreamProxy {
     }
   }
 
+  static String resolveUserAgent(String originalUrl) {
+    if (originalUrl.contains('c=IOS')) {
+      return 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)';
+    } else if (originalUrl.contains('c=ANDROID_VR')) {
+      return 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip';
+    } else if (originalUrl.contains('c=ANDROID')) {
+      return 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip';
+    } else {
+      return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    }
+  }
+
+  static void cancelPreviousSessions([String? keepSongId]) {
+    final keysToRemove = <String>[];
+    for (final entry in _activeSessions.entries) {
+      if (keepSongId == null || !entry.key.startsWith("$keepSongId-")) {
+        entry.value.cancel();
+        keysToRemove.add(entry.key);
+      }
+    }
+    for (final k in keysToRemove) {
+      _activeSessions.remove(k);
+    }
+  }
+
   static String getProxyUrl({
     required String songId,
     required String originalUrl,
     required int totalSize,
     required String mimeType,
   }) {
+    cancelPreviousSessions(songId);
     _activeStreams[songId] = StreamMetadata(
       originalUrl: originalUrl,
       totalSize: totalSize,
       mimeType: mimeType,
     );
-    return "http://127.0.0.1:$_port/stream?id=$songId";
+    final ext = mimeType.contains('webm') ? 'webm' : 'm4a';
+    return "http://127.0.0.1:$_port/stream.$ext?id=$songId";
   }
 
   static Future<void> _handleRequest(HttpRequest request) async {
     final uri = request.uri;
-    if (uri.path != '/stream') {
+    if (!uri.path.startsWith('/stream')) {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();
       return;
@@ -93,8 +120,29 @@ class StreamProxy {
     final originalUrl = metadata.originalUrl;
     int totalSize = metadata.totalSize;
 
-    // 1. Instant HEAD response (0ms probe, ExoPlayer duration calculation passes immediately)
+    // 1. Instant HEAD response (0ms probe, player duration calculation passes immediately)
     if (request.method == 'HEAD') {
+      if (totalSize <= 0) {
+        try {
+          final client = HttpClient();
+          client.userAgent = resolveUserAgent(originalUrl);
+          client.connectionTimeout = const Duration(seconds: 4);
+          final headReq = await client.headUrl(Uri.parse(originalUrl));
+          final headRes = await headReq.close();
+          AppLogger.info("StreamProxy: upstream HEAD returned ${headRes.statusCode}, length=${headRes.contentLength}", tag: "StreamProxy");
+          if (headRes.contentLength > 0) {
+            totalSize = headRes.contentLength;
+            _activeStreams[songId ?? ''] = StreamMetadata(
+              originalUrl: originalUrl,
+              totalSize: totalSize,
+              mimeType: metadata.mimeType,
+            );
+          }
+          client.close(force: true);
+        } catch (e) {
+          AppLogger.warn("StreamProxy: upstream HEAD probe failed: $e", tag: "StreamProxy");
+        }
+      }
       request.response.statusCode = HttpStatus.ok;
       request.response.headers.set(HttpHeaders.acceptRangesHeader, 'bytes');
       request.response.headers
@@ -114,18 +162,11 @@ class StreamProxy {
       return;
     }
 
-    // 2. Cancel any previous ongoing stream for this songId (prevents seek/skip freezing)
-    if (songId != null) {
-      final prevSession = _activeSessions.remove(songId);
-      prevSession?.cancel();
-    }
-
     final session = _ActiveSession(++_sessionCounter);
-    if (songId != null) {
-      _activeSessions[songId] = session;
-    }
+    final sessionKey = "$songId-${session.id}";
+    _activeSessions[sessionKey] = session;
 
-    // 3. Parse incoming Range header from ExoPlayer
+    // 3. Parse incoming Range header from Player
     final rangeHeader = request.headers.value(HttpHeaders.rangeHeader);
     int start = 0;
     int? end;
@@ -145,7 +186,7 @@ class StreamProxy {
 
     final contentLength = targetEnd - start + 1;
 
-    // 4. Setup Response Headers for ExoPlayer
+    // 4. Setup Response Headers for Player
     request.response.bufferOutput = false; // Stream bytes directly without buffering delay
 
     if (rangeHeader != null) {
@@ -185,6 +226,8 @@ class StreamProxy {
         }
 
         final client = HttpClient();
+        final ua = resolveUserAgent(originalUrl);
+        client.userAgent = ua; // <<-- CRITICAL: MUST BE SET ON HttpClient!
         client.connectionTimeout = const Duration(seconds: 8);
         client.autoUncompress = false;
         session.currentClient = client;
@@ -194,19 +237,11 @@ class StreamProxy {
           final ytReq = await client.getUrl(chunkUri);
           ytReq.headers
               .set(HttpHeaders.rangeHeader, 'bytes=$currentPos-$chunkEnd');
-          String ua = 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip';
-          if (originalUrl.contains('c=IOS')) {
-            ua = 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)';
-          } else if (originalUrl.contains('c=ANDROID_VR')) {
-            ua = 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip';
-          } else if (originalUrl.contains('c=ANDROID')) {
-            ua = 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip';
-          } else {
-            ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-          }
           ytReq.headers.set(HttpHeaders.userAgentHeader, ua);
 
           final ytRes = await ytReq.close();
+          AppLogger.info("StreamProxy: upstream GET bytes=$currentPos-$chunkEnd returned status ${ytRes.statusCode}", tag: "StreamProxy");
+
           if (ytRes.statusCode == HttpStatus.ok ||
               ytRes.statusCode == HttpStatus.partialContent) {
             final completer = Completer<void>();
@@ -233,7 +268,8 @@ class StreamProxy {
               onDone: () {
                 if (!completer.isCompleted) completer.complete();
               },
-              onError: (_) {
+              onError: (e) {
+                AppLogger.warn("StreamProxy: chunk stream error: $e", tag: "StreamProxy");
                 if (!completer.isCompleted) completer.complete();
               },
               cancelOnError: true,
@@ -258,14 +294,18 @@ class StreamProxy {
 
             currentPos = chunkEnd + 1;
           } else {
-            AppLogger.error("StreamProxy: YouTube returned status ${ytRes.statusCode} for $songId (chunk: bytes=$currentPos-$chunkEnd)", tag: "StreamProxy");
-            await ytRes.drain();
+            String errBody = '';
+            try {
+              errBody = await ytRes.transform(const SystemEncoding().decoder).join();
+            } catch (_) {}
+            AppLogger.error("StreamProxy: YouTube returned status ${ytRes.statusCode} for $songId (chunk: bytes=$currentPos-$chunkEnd), body: $errBody", tag: "StreamProxy");
             try {
               client.close(force: true);
             } catch (_) {}
             break;
           }
-        } catch (_) {
+        } catch (e) {
+          AppLogger.warn("StreamProxy: chunk fetch exception: $e", tag: "StreamProxy");
           try {
             client.close(force: true);
           } catch (_) {}
@@ -275,9 +315,7 @@ class StreamProxy {
     } catch (_) {
       // Disconnection / normal player exit
     } finally {
-      if (songId != null && _activeSessions[songId] == session) {
-        _activeSessions.remove(songId);
-      }
+      _activeSessions.remove(sessionKey);
       session.cancel();
       try {
         await request.response.close();
