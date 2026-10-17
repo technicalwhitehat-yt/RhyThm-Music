@@ -2,7 +2,7 @@
   <img src="img/rhythm_logo.png" alt="Rhythm Music Logo" width="130" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(124, 77, 255, 0.45);" />
 </p>
 
-<h1 align="center">🎵 Rhythm Music v2.1</h1>
+<h1 align="center">🎵 Rhythm Music - Free &amp; Ad-Free Music Streaming Player</h1>
 
 <p align="center">
   <b>A modern, open-source, ad-free, high-fidelity music streaming and offline player crafted with passion.</b>
