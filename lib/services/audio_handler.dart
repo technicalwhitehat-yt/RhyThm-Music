@@ -95,9 +95,7 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
       bufferForPlaybackDuration: Duration(milliseconds: 100),
       bufferForPlaybackAfterRebufferDuration: Duration(milliseconds: 500),
     )));
-    if (!GetPlatform.isDesktop) {
-      StreamProxy.ensureStarted();
-    }
+    StreamProxy.ensureStarted();
     _createCacheDir();
     _addEmptyList();
     _notifyAudioHandlerAboutPlaybackEvents();
@@ -294,13 +292,14 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
       final codec = (mediaItem.extras?['codec'] as String?) ?? 'mp4a';
       final mimeType = codec.contains('opus') ? 'audio/webm' : 'audio/mp4';
 
-      if (StreamProxy.isRunning && !GetPlatform.isDesktop) {
+      if (StreamProxy.isRunning) {
         final proxyUrl = StreamProxy.getProxyUrl(
           songId: mediaItem.id,
           originalUrl: url,
           totalSize: totalSize,
           mimeType: mimeType,
         );
+        AppLogger.info("Routing stream through Local Proxy: $proxyUrl (mimeType: $mimeType)", tag: "AudioHandler");
         return AudioSource.uri(
           Uri.parse(proxyUrl),
           tag: mediaItem,
@@ -308,6 +307,11 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
       }
       return AudioSource.uri(
         Uri.parse(url),
+        headers: {
+          'User-Agent': url.contains('c=ANDROID_VR')
+              ? 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip'
+              : 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)',
+        },
         tag: mediaItem,
       );
     } else {
@@ -484,13 +488,21 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
 
         // Check if cached first for instant response without debouncing
         final songsUrlCacheBox = Hive.box("SongsUrlCache");
+        final cachedData = songsUrlCacheBox.get(currentSong.id);
+        final cachedUrl = (cachedData is Map)
+            ? (cachedData['highQualityAudio']?['url'] ??
+                    cachedData['lowQualityAudio']?['url'])
+                ?.toString()
+            : null;
+        final bool isStaleCached = cachedUrl != null &&
+            (cachedUrl.contains("itag=18") ||
+                cachedUrl.contains("mime=video") ||
+                (cachedUrl.contains("c=ANDROID&") &&
+                    !cachedUrl.contains("c=ANDROID_VR")));
         final bool isCached = !isNewUrlReq &&
-            songsUrlCacheBox.containsKey(currentSong.id) &&
-            songsUrlCacheBox.get(currentSong.id) is Map &&
-            !isExpired(
-                url: (songsUrlCacheBox.get(currentSong.id)['highQualityAudio']?['url'] ??
-                        songsUrlCacheBox.get(currentSong.id)['lowQualityAudio']?['url'])
-                    ?.toString());
+            cachedUrl != null &&
+            !isStaleCached &&
+            !isExpired(url: cachedUrl);
 
         // If not cached, debounce 250ms to absorb rapid user next/prev button clicks
         if (!isCached) {
@@ -959,15 +971,26 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
         try {
           final streamInfoJson = songsUrlCacheBox.get(songId);
           if (streamInfoJson is Map) {
-            final highUrl = streamInfoJson['highQualityAudio']?['url'];
-            final lowUrl = streamInfoJson['lowQualityAudio']?['url'];
+            final highUrl = streamInfoJson['highQualityAudio']?['url']?.toString();
+            final lowUrl = streamInfoJson['lowQualityAudio']?['url']?.toString();
             final testUrl = highUrl ?? lowUrl;
+            final bool isStaleOrVideo = testUrl != null &&
+                (testUrl.contains("itag=18") ||
+                    testUrl.contains("mime=video") ||
+                    (testUrl.contains("c=ANDROID&") &&
+                        !testUrl.contains("c=ANDROID_VR")));
             if (testUrl != null &&
-                testUrl.toString().startsWith("http") &&
-                !isExpired(url: testUrl.toString())) {
+                testUrl.startsWith("http") &&
+                !isExpired(url: testUrl) &&
+                !isStaleOrVideo) {
               printINFO("Got cached Url ($songId)");
               streamInfo = HMStreamingData.fromJson(streamInfoJson);
             } else {
+              if (isStaleOrVideo) {
+                AppLogger.warn(
+                    "Invalidated stale itag=18/video/c=ANDROID cache for $songId",
+                    tag: "AudioHandler");
+              }
               songsUrlCacheBox.delete(songId);
             }
           }

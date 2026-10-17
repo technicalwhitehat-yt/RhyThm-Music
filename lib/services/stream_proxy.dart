@@ -192,10 +192,17 @@ class StreamProxy {
           final ytReq = await client.getUrl(chunkUri);
           ytReq.headers
               .set(HttpHeaders.rangeHeader, 'bytes=$currentPos-$chunkEnd');
-          ytReq.headers.set(
-            HttpHeaders.userAgentHeader,
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          );
+          String ua = 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip';
+          if (originalUrl.contains('c=IOS')) {
+            ua = 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)';
+          } else if (originalUrl.contains('c=ANDROID_VR')) {
+            ua = 'com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12; Quest 2) gzip';
+          } else if (originalUrl.contains('c=ANDROID')) {
+            ua = 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip';
+          } else {
+            ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+          }
+          ytReq.headers.set(HttpHeaders.userAgentHeader, ua);
 
           final ytRes = await ytReq.close();
           if (ytRes.statusCode == HttpStatus.ok ||
