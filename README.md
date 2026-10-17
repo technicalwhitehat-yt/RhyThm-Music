@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/latest"><img src="https://img.shields.io/badge/Version-v2.1.0--Stable-8A2BE2.svg?style=for-the-badge&logo=android" alt="Version 2.1.0" /></a>
-  <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases"><img src="https://img.shields.io/github/downloads/technicalwhitehat-yt/RhyThm-Music/total?style=for-the-badge&logo=github&color=7C4DFF&label=Downloads" alt="Total Downloads" /></a>
+  <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases"><img src="https://img.shields.io/github/downloads/technicalwhitehat-yt/RhyThm-Music/total.svg?style=for-the-badge&logo=github&color=7C4DFF&label=Downloads" alt="Total Downloads" /></a>
   <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License: MIT" /></a>
   <a href="https://rhythm-music.free.nf/?i=2"><img src="https://img.shields.io/badge/Developer-Technical%20White%20Hat-7C4DFF.svg?style=for-the-badge&logo=googlechrome" alt="Developer" /></a>
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Windows%20%7C%20Linux%20%7C%20iOS-brightgreen.svg?style=for-the-badge" alt="Platforms" />
@@ -113,8 +113,8 @@ Explore the aesthetics and user interface of **Rhythm Music 2.0**:
 ## 📦 Download & Release Packages
 
 <p align="center">
-  <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases"><img src="https://img.shields.io/github/downloads/technicalwhitehat-yt/RhyThm-Music/total?style=for-the-badge&logo=github&color=7C4DFF&label=Total%20Downloads" alt="Total Downloads" /></a>
-  <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/latest"><img src="https://img.shields.io/github/downloads/technicalwhitehat-yt/RhyThm-Music/latest/total?style=for-the-badge&logo=github&color=8A2BE2&label=Latest%20Release%20Downloads" alt="Latest Downloads" /></a>
+  <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases"><img src="https://img.shields.io/github/downloads/technicalwhitehat-yt/RhyThm-Music/total.svg?style=for-the-badge&logo=github&color=7C4DFF&label=Total%20Downloads" alt="Total Downloads" /></a>
+  <a href="https://github.com/technicalwhitehat-yt/RhyThm-Music/releases/latest"><img src="https://img.shields.io/github/downloads/technicalwhitehat-yt/RhyThm-Music/latest/total.svg?style=for-the-badge&logo=github&color=8A2BE2&label=Latest%20Release%20Downloads" alt="Latest Downloads" /></a>
 </p>
 
 Download the official **v2.1.0** release for your specific architecture and operating system:
