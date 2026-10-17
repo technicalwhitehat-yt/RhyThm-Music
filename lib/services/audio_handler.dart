@@ -142,10 +142,12 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
   }
 
   void _addEmptyList() {
-    try {
-      _player.setAudioSource(_playList);
-    } catch (r) {
-      printERROR(r.toString());
+    if (!GetPlatform.isDesktop) {
+      try {
+        _player.setAudioSource(_playList);
+      } catch (r) {
+        printERROR(r.toString());
+      }
     }
   }
 
@@ -552,13 +554,12 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           } catch (_) {}
 
           if (GetPlatform.isDesktop) {
-            if (_player.audioSource != _playList) {
-              await _player.setAudioSource(_playList);
-            }
-            if (_playList.children.isNotEmpty) {
-              await _playList.clear();
-            }
-            await _playList.add(_createAudioSource(currentSong));
+            try {
+              await _player.stop();
+            } catch (_) {}
+            await _player.setAudioSource(
+              _createAudioSource(currentSong),
+            );
           } else {
             await _player.setAudioSource(
               _createAudioSource(currentSong),
@@ -691,13 +692,12 @@ class MyAudioHandler extends BaseAudioHandler with GetxServiceMixin {
           } catch (_) {}
 
           if (GetPlatform.isDesktop) {
-            if (_player.audioSource != _playList) {
-              await _player.setAudioSource(_playList);
-            }
-            if (_playList.children.isNotEmpty) {
-              await _playList.clear();
-            }
-            await _playList.add(_createAudioSource(currMed));
+            try {
+              await _player.stop();
+            } catch (_) {}
+            await _player.setAudioSource(
+              _createAudioSource(currMed),
+            );
           } else {
             await _player.setAudioSource(
               _createAudioSource(currMed),

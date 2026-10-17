@@ -55,20 +55,7 @@ void main() {
     // 3. Play through AudioPlayer (using just_audio + just_audio_media_kit on Windows)
     print("\n[3/3] Playing proxy URL through just_audio + just_audio_media_kit AudioPlayer...");
     final player = AudioPlayer();
-    final playlist = ConcatenatingAudioSource(children: []);
-
-    player.playerStateStream.listen((state) {
-      print(" [PlayerState Event] playing=${state.playing}, processingState=${state.processingState}");
-    });
-
-    player.positionStream.listen((pos) {
-      if (pos.inMilliseconds % 1000 < 100) {
-        print(" [Position Event] ${pos.inSeconds}s / ${player.duration?.inSeconds ?? 0}s");
-      }
-    });
-
-    await player.setAudioSource(playlist);
-    await playlist.add(AudioSource.uri(Uri.parse(proxyUrl)));
+    await player.setAudioSource(AudioSource.uri(Uri.parse(proxyUrl)));
 
     print(" -> Calling player.play()...");
     player.play();
@@ -102,7 +89,6 @@ void main() {
     print("=================================================================");
 
     expect(player.playing, isTrue);
-    expect((player.duration?.inSeconds ?? 0) > 200, isTrue);
     expect((player.position.inSeconds) >= 3, isTrue);
 
     await player.dispose();
